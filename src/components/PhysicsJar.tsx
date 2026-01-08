@@ -1,6 +1,6 @@
-import { useEffect, useRef } from 'react';
-import Matter from 'matter-js';
-import { MarbleFactory } from '../utils/MarbleFactory'; // ✨ 경로/이름 변경
+import { useEffect, useRef } from "react";
+import Matter from "matter-js";
+import { MarbleFactory } from "../utils/MarbleFactory"; // ✨ 경로/이름 변경
 
 interface PhysicsJarProps {
   taskCount: number;
@@ -16,17 +16,17 @@ export default function PhysicsJar({ taskCount }: PhysicsJarProps) {
     if (!sceneRef.current) return;
 
     const Engine = Matter.Engine,
-          Render = Matter.Render,
-          World = Matter.World,
-          Bodies = Matter.Bodies,
-          Runner = Matter.Runner,
-          Events = Matter.Events;
+      Render = Matter.Render,
+      World = Matter.World,
+      Bodies = Matter.Bodies,
+      Runner = Matter.Runner,
+      Events = Matter.Events;
 
     const engine = Engine.create();
     engineRef.current = engine;
 
-    const width = 300;
-    const height = 400;
+    const width = sceneRef.current.clientWidth;
+    const height = sceneRef.current.clientHeight;
 
     const render = Render.create({
       element: sceneRef.current,
@@ -35,14 +35,14 @@ export default function PhysicsJar({ taskCount }: PhysicsJarProps) {
         width,
         height,
         wireframes: false,
-        background: 'transparent',
+        background: "transparent",
         pixelRatio: 2,
-      }
+      },
     });
     renderRef.current = render;
 
     // --- ✨ 커스텀 렌더링: 유리구슬 광택 효과 ---
-    Events.on(render, 'afterRender', () => {
+    Events.on(render, "afterRender", () => {
       const context = render.context;
       const bodies = Matter.Composite.allBodies(engine.world);
 
@@ -55,21 +55,25 @@ export default function PhysicsJar({ taskCount }: PhysicsJarProps) {
 
           // 1. 입체감 그라데이션 (하이라이트)
           const gradient = context.createRadialGradient(
-            x - radius * 0.3, y - radius * 0.3, radius * 0.1,
-            x, y, radius
+            x - radius * 0.3,
+            y - radius * 0.3,
+            radius * 0.1,
+            x,
+            y,
+            radius
           );
 
-          gradient.addColorStop(0, '#FFFFFF'); // 반사광
-          gradient.addColorStop(0.2, color);   // 본래 색
+          gradient.addColorStop(0, "#FFFFFF"); // 반사광
+          gradient.addColorStop(0.2, color); // 본래 색
           gradient.addColorStop(1, color);
 
           context.beginPath();
           context.arc(x, y, radius, 0, 2 * Math.PI);
           context.fillStyle = gradient;
           context.fill();
-          
+
           // 2. 외곽선 (선택 사항)
-          context.strokeStyle = 'rgba(255,255,255,0.4)';
+          context.strokeStyle = "rgba(255,255,255,0.4)";
           context.lineWidth = 2;
           context.stroke();
         }
@@ -77,14 +81,26 @@ export default function PhysicsJar({ taskCount }: PhysicsJarProps) {
     });
 
     // 유리병 벽 (투명)
-    const wallOptions = { 
-        isStatic: true, 
-        render: { fillStyle: 'transparent', visible: false } 
+    const wallOptions = {
+      isStatic: true,
+      render: { fillStyle: "transparent", visible: false },
     };
-    
-    const ground = Bodies.rectangle(width / 2, height + 10, width, 40, wallOptions);
-    const leftWall = Bodies.rectangle(-10, height / 2, 20, height, wallOptions);
-    const rightWall = Bodies.rectangle(width + 10, height / 2, 20, height, wallOptions);
+
+    const ground = Bodies.rectangle(
+      width / 2,
+      height + 10,
+      width,
+      30,
+      wallOptions
+    );
+    const leftWall = Bodies.rectangle(-10, height / 2, 30, height, wallOptions);
+    const rightWall = Bodies.rectangle(
+      width + 10,
+      height / 2,
+      30,
+      height,
+      wallOptions
+    );
 
     World.add(engine.world, [ground, leftWall, rightWall]);
 
@@ -105,8 +121,10 @@ export default function PhysicsJar({ taskCount }: PhysicsJarProps) {
   // 구슬 추가 로직
   useEffect(() => {
     if (!engineRef.current || !renderRef.current) return;
-    
-    const currentBodies = Matter.Composite.allBodies(engineRef.current.world).filter(b => !b.isStatic);
+
+    const currentBodies = Matter.Composite.allBodies(
+      engineRef.current.world
+    ).filter((b) => !b.isStatic);
     const bodiesToAdd = taskCount - currentBodies.length;
 
     if (bodiesToAdd > 0) {
@@ -114,7 +132,7 @@ export default function PhysicsJar({ taskCount }: PhysicsJarProps) {
         // ✨ MarbleFactory 사용
         const marble = MarbleFactory.create(
           150 + (Math.random() - 0.5) * 50,
-          -50 - (i * 30),
+          -50 - i * 30,
           22
         );
         Matter.World.add(engineRef.current.world, marble);
@@ -123,14 +141,14 @@ export default function PhysicsJar({ taskCount }: PhysicsJarProps) {
   }, [taskCount]);
 
   return (
-    <div 
-      ref={sceneRef} 
-      style={{ 
-        width: '100%', 
-        height: '100%', 
-        display: 'flex', 
-        justifyContent: 'center',
-      }} 
+    <div
+      ref={sceneRef}
+      style={{
+        width: "100%",
+        height: "100%",
+        display: "flex",
+        justifyContent: "center",
+      }}
     />
   );
 }
