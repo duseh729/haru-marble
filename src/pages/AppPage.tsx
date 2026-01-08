@@ -135,7 +135,7 @@ export default function AppPage() {
                 <span>{action.text}</span>
               </Button>
             ))}
-            <Button >
+            <Button>
               <Plus />
               <span>추가</span>
             </Button>
@@ -143,9 +143,12 @@ export default function AppPage() {
         </header>
 
         {/* --- 중단 유리병 영역 --- */}
-        <main className="flex-1 flex justify-center items-center mb-8 relative">
-          <div className="relative w-[300px] h-[400px] bg-white rounded-[1rem] border-4 border-gray-200 shadow-lg overflow-hidden z-10">
-            <div className="absolute top-0 left-1/2 -translate-x-1/2 w-3/5 h-10 bg-gradient-to-b from-gray-200/50 to-transparent rounded-b-3xl z-20"></div>
+        <main className="flex-1 flex flex-col justify-center items-center mb-8 relative">
+          {/* 유리병 뚜껑 영역 */}
+          <div className="w-[260px] h-8 bg-gray-200 from-gray-200/50 to-transparent rounded-xl z-20"></div>
+
+          <div className="rounded-b-[2rem] rounded-t-[50px] relative w-[300px] h-[400px] bg-white border-4 border-gray-200 shadow-lg overflow-hidden z-10">
+            {/* 유리병 구슬 쌓이는 부분 */}
             <div className="absolute inset-0 flex justify-center items-end px-1">
               <PhysicsJar taskCount={tasks.length} />
             </div>
@@ -162,7 +165,7 @@ export default function AppPage() {
           {/* 입력창 */}
           <div className="flex items-center bg-gray-100 rounded-full p-2 mb-6">
             <button className="p-2 text-gray-400">
-              <Plus  />
+              <Plus />
             </button>
             <input
               type="text"
