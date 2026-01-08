@@ -1,6 +1,8 @@
 import { useState } from "react";
 import { Helmet } from "react-helmet-async";
 import PhysicsJar from "../components/PhysicsJar";
+import { Button } from "@/components/ui/button";
+import { Plus } from "lucide-react";
 
 // 태스크 타입 정의
 interface Task {
@@ -30,23 +32,6 @@ const Icons = {
       <path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22" />
       <path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22" />
       <path d="M18 2H6v7a6 6 0 0 0 12 0V2Z" />
-    </svg>
-  ),
-  Plus: ({ className }: { className?: string }) => (
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      width="20"
-      height="20"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      className={className}
-    >
-      <path d="M5 12h14" />
-      <path d="M12 5v14" />
     </svg>
   ),
   Send: () => (
@@ -142,19 +127,18 @@ export default function AppPage() {
           {/* 퀵 액션 칩 */}
           <div className="flex space-x-2 overflow-x-auto pb-2 scrollbar-hide">
             {quickActions.map((action, index) => (
-              <button
+              <Button
                 key={index}
                 onClick={() => addTask(action.text)}
-                className={`flex items-center space-x-1 px-3 py-1.5 rounded-full text-sm font-medium whitespace-nowrap transition-colors ${action.color} hover:brightness-95`}
+                variant="outline"
               >
-                <span>{action.emoji}</span>
                 <span>{action.text}</span>
-              </button>
+              </Button>
             ))}
-            <button className="flex items-center space-x-1 px-3 py-1.5 rounded-full text-sm font-medium bg-gray-200 text-gray-600 hover:bg-gray-300 transition-colors">
-              <Icons.Plus className="w-4 h-4" />
+            <Button >
+              <Plus />
               <span>추가</span>
-            </button>
+            </Button>
           </div>
         </header>
 
@@ -178,7 +162,7 @@ export default function AppPage() {
           {/* 입력창 */}
           <div className="flex items-center bg-gray-100 rounded-full p-2 mb-6">
             <button className="p-2 text-gray-400">
-              <Icons.Plus className="w-6 h-6" />
+              <Plus  />
             </button>
             <input
               type="text"
