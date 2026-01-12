@@ -1,8 +1,8 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Helmet } from "react-helmet-async";
 import PhysicsJar from "../components/PhysicsJar";
 import { Button } from "@/components/ui/button";
-import { Plus } from "lucide-react";
+import { Plus, X, Zap, Check, Trash2, History, CalendarDays } from "lucide-react"; // History, CalendarDays 추가
 
 // 태스크 타입 정의
 interface Task {
@@ -11,21 +11,25 @@ interface Task {
   time: string;
 }
 
-// 아이콘 컴포넌트들 (라이브러리 대신 직접 정의)
+// 퀵 액션(자주 하는 일) 타입 정의
+interface QuickActionItem {
+  id: string;
+  emoji: string;
+  text: string;
+}
+
+// 기본 퀵 액션 데이터
+const DEFAULT_QUICK_ACTIONS: QuickActionItem[] = [
+  { id: '1', emoji: "💧", text: "물 마시기" },
+  { id: '2', emoji: "🏃", text: "운동하기" },
+  { id: '3', emoji: "📖", text: "책 읽기" },
+  { id: '4', emoji: "💊", text: "영양제" },
+];
+
+// 아이콘 컴포넌트들
 const Icons = {
   Trophy: () => (
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      width="20"
-      height="20"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      className="text-yellow-500"
-    >
+    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-yellow-500">
       <path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6" />
       <path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18" />
       <path d="M4 22h16" />
@@ -35,34 +39,13 @@ const Icons = {
     </svg>
   ),
   Send: () => (
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      width="20"
-      height="20"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
+    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
       <path d="m22 2-7 20-4-9-9-4Z" />
       <path d="M22 2 11 13" />
     </svg>
   ),
   CheckCircle: () => (
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      width="24"
-      height="24"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      className="text-green-500 fill-green-100"
-    >
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-green-500 fill-green-100">
       <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
       <path d="m9 11 3 3L22 4" />
     </svg>
@@ -76,6 +59,24 @@ export default function AppPage() {
   ]);
   const [input, setInput] = useState("");
 
+  // --- 모달 상태 관리 ---
+  const [isQuickActionModalOpen, setIsQuickActionModalOpen] = useState(false);
+  const [isHistoryModalOpen, setIsHistoryModalOpen] = useState(false); // ✨ 기록 모달 상태 추가
+
+  // 퀵 액션 관련 상태
+  const [selectedActionIds, setSelectedActionIds] = useState<string[]>([]);
+  const [quickActions, setQuickActions] = useState<QuickActionItem[]>(() => {
+    const saved = localStorage.getItem('myQuickActions');
+    return saved ? JSON.parse(saved) : DEFAULT_QUICK_ACTIONS;
+  });
+
+  const [newActionText, setNewActionText] = useState("");
+  const [newActionEmoji, setNewActionEmoji] = useState("✨");
+
+  useEffect(() => {
+    localStorage.setItem('myQuickActions', JSON.stringify(quickActions));
+  }, [quickActions]);
+
   const getCurrentTime = () => {
     const now = new Date();
     const hours = String(now.getHours()).padStart(2, "0");
@@ -88,20 +89,49 @@ export default function AppPage() {
     if (!taskText) return;
 
     const newTask: Task = {
-      id: Date.now(),
+      id: Date.now() + Math.random(),
       text: taskText,
       time: getCurrentTime(),
     };
 
-    setTasks([...tasks, newTask]);
+    setTasks((prev) => [...prev, newTask]);
     setInput("");
   };
 
-  const quickActions = [
-    { emoji: "💧", text: "물 마시기", color: "bg-blue-100 text-blue-600" },
-    { emoji: "🏃", text: "운동하기", color: "bg-green-100 text-green-600" },
-    { emoji: "📖", text: "책 읽기", color: "bg-pink-100 text-pink-600" },
-  ];
+  // --- 퀵 액션 로직 ---
+  const createQuickAction = () => {
+    if (!newActionText.trim()) return;
+    const newAction: QuickActionItem = {
+      id: Date.now().toString(),
+      emoji: newActionEmoji || "⚡",
+      text: newActionText.trim(),
+    };
+    setQuickActions([...quickActions, newAction]);
+    setNewActionText("");
+    setNewActionEmoji("✨");
+  };
+
+  const deleteQuickAction = (id: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    const filtered = quickActions.filter(action => action.id !== id);
+    setQuickActions(filtered);
+    setSelectedActionIds(prev => prev.filter(selectedId => selectedId !== id));
+  };
+
+  const toggleSelection = (id: string) => {
+    if (selectedActionIds.includes(id)) {
+      setSelectedActionIds(prev => prev.filter(itemId => itemId !== id));
+    } else {
+      setSelectedActionIds(prev => [...prev, id]);
+    }
+  };
+
+  const handleAddSelected = () => {
+    const selectedItems = quickActions.filter(item => selectedActionIds.includes(item.id));
+    selectedItems.forEach(item => addTask(item.text));
+    setSelectedActionIds([]);
+    setIsQuickActionModalOpen(false);
+  };
 
   return (
     <div className="w-full flex justify-center">
@@ -110,45 +140,47 @@ export default function AppPage() {
       </Helmet>
 
       <div>
-        {/* --- 상단 헤더 영역 --- */}
+        {/* --- 상단 헤더 --- */}
         <header className="mb-6">
           <div className="flex justify-between items-start mb-2">
             <div className="">
               <h1 className="text-3xl font-bold text-gray-900">Done-List</h1>
               <p className="text-gray-600">오늘의 성취를 담다</p>
             </div>
-            {/* 총 성취 개수 뱃지 */}
             <div className="flex items-center space-x-2 bg-white rounded-full px-4 py-2 shadow-sm">
               <Icons.Trophy />
               <span className="font-bold text-gray-800">{tasks.length}</span>
             </div>
           </div>
 
-          {/* 퀵 액션 칩 */}
-          <div className="flex space-x-2 overflow-x-auto pb-2 scrollbar-hide">
-            {quickActions.map((action, index) => (
-              <Button
-                key={index}
-                onClick={() => addTask(action.text)}
-                variant="outline"
-              >
-                <span>{action.text}</span>
-              </Button>
-            ))}
-            <Button>
-              <Plus />
-              <span>추가</span>
+          {/* ✨ 버튼 영역 수정: Flex로 나란히 배치 */}
+          <div className="pt-2 flex gap-2">
+            {/* 1. 자주 하는 일 버튼 (왼쪽, 넓게) */}
+            <Button
+              variant="outline"
+              className="flex-1 flex items-center justify-center space-x-2 h-12 rounded-xl border-dashed border-2 hover:border-solid hover:bg-gray-50"
+              onClick={() => setIsQuickActionModalOpen(true)}
+            >
+              <Zap className="w-4 h-4 text-yellow-500" />
+              <span className="text-gray-600">자주 하는 일 관리</span>
+            </Button>
+
+            {/* 2. 오늘 한 일 기록 보기 버튼 (오른쪽, 아이콘) */}
+            <Button
+              variant="outline"
+              className="w-14 h-12 rounded-xl border-2 hover:bg-gray-50 flex items-center justify-center"
+              onClick={() => setIsHistoryModalOpen(true)}
+              title="오늘의 기록 보기"
+            >
+              <History className="w-5 h-5 text-gray-500" />
             </Button>
           </div>
         </header>
 
-        {/* --- 중단 유리병 영역 --- */}
+        {/* --- 메인 유리병 --- */}
         <main className="flex-1 flex flex-col justify-center items-center mb-8 relative">
-          {/* 유리병 뚜껑 영역 */}
           <div className="w-[260px] h-8 bg-gray-200 from-gray-200/50 to-transparent rounded-xl z-20"></div>
-
           <div className="rounded-b-[2rem] rounded-t-[50px] relative w-[300px] h-[400px] bg-white border-4 border-gray-200 shadow-lg overflow-hidden z-10">
-            {/* 유리병 구슬 쌓이는 부분 */}
             <div className="absolute inset-0 flex justify-center items-end px-1">
               <PhysicsJar taskCount={tasks.length} />
             </div>
@@ -156,17 +188,11 @@ export default function AppPage() {
           <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[320px] h-[420px] bg-blue-100/50 rounded-full blur-3xl -z-10"></div>
         </main>
 
-        {/* --- 하단 입력 및 리스트 영역 --- */}
+        {/* --- 하단 리스트 --- */}
         <section className="bg-white rounded-t-3xl p-6 -mx-6 -mb-6 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)]">
-          <h2 className="text-sm font-semibold text-gray-500 mb-3">
-            새로운 할 일
-          </h2>
-
-          {/* 입력창 */}
+          <h2 className="text-sm font-semibold text-gray-500 mb-3">새로운 할 일</h2>
           <div className="flex items-center bg-gray-100 rounded-full p-2 mb-6">
-            <button className="p-2 text-gray-400">
-              <Plus />
-            </button>
+            <button className="p-2 text-gray-400"><Plus /></button>
             <input
               type="text"
               value={input}
@@ -182,35 +208,126 @@ export default function AppPage() {
               <Icons.Send />
             </button>
           </div>
-
-          {/* 오늘 완료한 일 리스트 */}
-          <h2 className="text-sm font-semibold text-gray-500 mb-3">
-            오늘 완료한 일
-          </h2>
-          <ul className="space-y-2 max-h-[200px] overflow-y-auto scrollbar-hide">
-            {tasks
-              .slice()
-              .reverse()
-              .map((task) => (
-                <li
-                  key={task.id}
-                  className="flex items-center justify-between bg-gray-50 rounded-2xl p-4"
-                >
-                  <div className="flex items-center space-x-3">
-                    <Icons.CheckCircle />
-                    <span className="text-gray-800">{task.text}</span>
-                  </div>
-                  <span className="text-xs text-gray-400">{task.time}</span>
-                </li>
-              ))}
-            {tasks.length === 0 && (
-              <li className="text-center text-gray-400 py-4">
-                아직 완료한 일이 없습니다.
-              </li>
-            )}
-          </ul>
         </section>
       </div>
+
+      {/* --- 모달 1: 자주 하는 일 (Quick Actions) --- */}
+      {isQuickActionModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/50 backdrop-blur-sm p-4 animate-in fade-in duration-200">
+          <div 
+            className="bg-white w-full max-w-sm rounded-3xl p-6 shadow-2xl animate-in slide-in-from-bottom-10 flex flex-col max-h-[85vh]"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="text-xl font-bold text-gray-900">자주 하는 일</h3>
+              <Button variant="ghost" size="icon" onClick={() => setIsQuickActionModalOpen(false)} className="h-8 w-8 rounded-full">
+                <X className="w-5 h-5" />
+              </Button>
+            </div>
+
+            <div className="flex gap-2 mb-6 bg-gray-50 p-2 rounded-xl">
+              <input 
+                type="text" 
+                className="w-10 text-center bg-white rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                value={newActionEmoji}
+                onChange={(e) => setNewActionEmoji(e.target.value)}
+                placeholder="✨"
+                maxLength={2}
+              />
+              <input 
+                type="text" 
+                className="flex-1 px-3 py-2 bg-white rounded-lg border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                value={newActionText}
+                onChange={(e) => setNewActionText(e.target.value)}
+                onKeyDown={(e) => e.key === "Enter" && createQuickAction()}
+                placeholder="습관 이름 (예: 독서)"
+              />
+              <Button size="icon" onClick={createQuickAction} className="shrink-0 bg-gray-900 hover:bg-gray-800">
+                <Plus className="w-4 h-4" />
+              </Button>
+            </div>
+
+            <div className="grid grid-cols-2 gap-3 mb-6 overflow-y-auto pr-1">
+              {quickActions.map((action) => {
+                const isSelected = selectedActionIds.includes(action.id);
+                return (
+                  <Button
+                    key={action.id}
+                    variant={isSelected ? "default" : "outline"}
+                    className={`relative h-auto py-4 justify-start space-x-2 pr-8 ${isSelected ? "bg-blue-600 hover:bg-blue-700 border-blue-600" : "border-gray-200 hover:bg-gray-50"}`}
+                    onClick={() => toggleSelection(action.id)}
+                  >
+                    <span className="text-lg">{action.emoji}</span>
+                    <span className={`truncate ${isSelected ? "text-white" : "text-gray-700"}`}>{action.text}</span>
+                    {isSelected && <Check className="w-4 h-4 absolute right-3 top-1/2 -translate-y-1/2 text-white" />}
+                    {!isSelected && (
+                      <div role="button" onClick={(e) => deleteQuickAction(action.id, e)} className="absolute right-2 top-1/2 -translate-y-1/2 p-1.5 text-gray-300 hover:text-red-500 hover:bg-red-50 rounded-full transition-colors">
+                        <Trash2 className="w-3.5 h-3.5" />
+                      </div>
+                    )}
+                  </Button>
+                );
+              })}
+            </div>
+
+            <Button
+              className="w-full h-14 text-lg rounded-xl font-bold bg-blue-600 hover:bg-blue-700 mt-auto shadow-lg shadow-blue-200"
+              disabled={selectedActionIds.length === 0}
+              onClick={handleAddSelected}
+            >
+              {selectedActionIds.length > 0 ? `${selectedActionIds.length}개 추가하기` : "추가할 항목을 선택하세요"}
+            </Button>
+          </div>
+        </div>
+      )}
+
+      {/* --- ✨ 모달 2: 오늘의 기록 (History) --- */}
+      {isHistoryModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/50 backdrop-blur-sm p-4 animate-in fade-in duration-200">
+          <div 
+            className="bg-white w-full max-w-sm rounded-3xl p-6 shadow-2xl animate-in slide-in-from-bottom-10 flex flex-col max-h-[80vh]"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex justify-between items-center mb-6">
+              <div className="flex items-center space-x-2">
+                <CalendarDays className="w-6 h-6 text-blue-500" />
+                <h3 className="text-xl font-bold text-gray-900">오늘의 기록</h3>
+              </div>
+              <Button variant="ghost" size="icon" onClick={() => setIsHistoryModalOpen(false)} className="h-8 w-8 rounded-full">
+                <X className="w-5 h-5" />
+              </Button>
+            </div>
+
+            {/* 기록 리스트 영역 */}
+            <div className="overflow-y-auto pr-2 space-y-3 min-h-[200px]">
+              {tasks.length === 0 ? (
+                <div className="flex flex-col items-center justify-center h-40 text-gray-400 space-y-2">
+                  <div className="text-4xl">📭</div>
+                  <p>아직 완료한 일이 없어요.</p>
+                </div>
+              ) : (
+                tasks.slice().reverse().map((task) => (
+                  <div key={task.id} className="flex items-center justify-between p-4 bg-gray-50 rounded-2xl border border-gray-100">
+                    <div className="flex items-center space-x-3 overflow-hidden">
+                      <div className="flex-shrink-0 w-8 h-8 rounded-full bg-green-100 flex items-center justify-center text-green-600">
+                        <Check className="w-4 h-4" />
+                      </div>
+                      <span className="font-medium text-gray-800 truncate">{task.text}</span>
+                    </div>
+                    <span className="text-xs font-medium text-gray-400 bg-white px-2 py-1 rounded-full border border-gray-100">
+                      {task.time}
+                    </span>
+                  </div>
+                ))
+              )}
+            </div>
+
+            <div className="mt-6 pt-6 border-t border-gray-100 text-center">
+               <p className="text-gray-500 text-sm">총 <span className="font-bold text-blue-600 text-lg">{tasks.length}</span>개의 구슬을 모았어요!</p>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
