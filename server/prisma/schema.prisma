@@ -1,0 +1,31 @@
+// prisma/schema.prisma
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// 1. 유저 모델 추가
+model User {
+  id        Int      @id @default(autoincrement())
+  email     String   @unique // 로그인 아이디
+  password  String   // 암호화된 비밀번호
+  tasks     Task[]   // 유저가 가진 할 일들 (1:N 관계)
+  createdAt DateTime @default(now())
+}
+
+// 2. 할 일 모델 수정 (주인 표시)
+model Task {
+  id        Int      @id @default(autoincrement())
+  text      String
+  emoji     String?
+  createdAt DateTime @default(now())
+  
+  // 누구의 할 일인가?
+  userId    Int
+  user      User     @relation(fields: [userId], references: [id])
+}
