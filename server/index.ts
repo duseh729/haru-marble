@@ -3,11 +3,15 @@ import cors from 'cors';
 import { PrismaClient } from '@prisma/client';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
+import dotenv from 'dotenv';
+
+//.env 파일 로딩 (반드시 맨 위에서 실행)
+dotenv.config(); 
 
 const app = express();
 const prisma = new PrismaClient();
 const PORT = 4000;
-const SECRET_KEY = "my-secret-key-shhh"; // 실무에선 .env 파일에 숨겨야 함!
+const SECRET_KEY = process.env.JWT_SECRET || "fallback-secret-key";
 
 app.use(cors());
 app.use(express.json());

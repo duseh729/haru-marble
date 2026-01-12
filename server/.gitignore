@@ -1,5 +1,19 @@
-node_modules
-# Keep environment variables out of version control
+# server/.gitignore
+
+# 1. 의존성 폴더
+node_modules/
+
+# 2. 환경변수 파일 (비밀번호 저장소 - 보안 필수!)
 .env
 
-/generated/prisma
+# 3. SQLite 데이터베이스
+*.db
+*.db-journal
+
+# 4. 빌드된 파일들
+dist/
+build/
+
+# 5. OS 파일
+.DS_Store
+Thumbs.db
