@@ -4,21 +4,24 @@ import PhysicsJar from "../components/PhysicsJar";
 import { Button } from "@/components/ui/button";
 import { Plus, X, Zap, Check, Trash2, History, CalendarDays } from "lucide-react"; // History, CalendarDays 추가
 
+import { tasksApi } from "../api/tasks"; // API 추가
+
 // 태스크 타입 정의
 interface Task {
   id: number;
   text: string;
-  time: string;
+  emoji?: string; // API에서 오는 emoji 대응
+  createdAt?: string; // API에서 오는 날짜
 }
 
-// 퀵 액션(자주 하는 일) 타입 정의
+// ... (QuickAction 관련 인터페이스 유지) ...
 interface QuickActionItem {
   id: string;
   emoji: string;
   text: string;
 }
 
-// 기본 퀵 액션 데이터
+// ... (DEFAULT_QUICK_ACTIONS 유지) ...
 const DEFAULT_QUICK_ACTIONS: QuickActionItem[] = [
   { id: '1', emoji: "💧", text: "물 마시기" },
   { id: '2', emoji: "🏃", text: "운동하기" },
@@ -26,8 +29,9 @@ const DEFAULT_QUICK_ACTIONS: QuickActionItem[] = [
   { id: '4', emoji: "💊", text: "영양제" },
 ];
 
-// 아이콘 컴포넌트들
+// ... (Icons 유지) ...
 const Icons = {
+  // ... 생략 ...
   Trophy: () => (
     <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-yellow-500">
       <path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6" />
@@ -53,11 +57,26 @@ const Icons = {
 };
 
 export default function AppPage() {
-  const [tasks, setTasks] = useState<Task[]>([
-    { id: 1, text: "아침 운동 30분", time: "09:23" },
-    { id: 2, text: "물 마시기", time: "10:15" },
-  ]);
+  const [tasks, setTasks] = useState<Task[]>([]);
   const [input, setInput] = useState("");
+  const [isLoading, setIsLoading] = useState(true);
+
+  // 초기 데이터 로딩
+  useEffect(() => {
+    loadTasks();
+  }, []);
+
+  const loadTasks = async () => {
+    try {
+      const data = await tasksApi.getTasks();
+      setTasks(data);
+    } catch (error) {
+      console.error("Failed to load tasks:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
 
   // --- 모달 상태 관리 ---
   const [isQuickActionModalOpen, setIsQuickActionModalOpen] = useState(false);
@@ -77,25 +96,25 @@ export default function AppPage() {
     localStorage.setItem('myQuickActions', JSON.stringify(quickActions));
   }, [quickActions]);
 
-  const getCurrentTime = () => {
-    const now = new Date();
-    const hours = String(now.getHours()).padStart(2, "0");
-    const minutes = String(now.getMinutes()).padStart(2, "0");
+  const getFormattedTime = (dateString?: string) => {
+    const date = dateString ? new Date(dateString) : new Date();
+    const hours = String(date.getHours()).padStart(2, "0");
+    const minutes = String(date.getMinutes()).padStart(2, "0");
     return `${hours}:${minutes}`;
   };
 
-  const addTask = (text: string) => {
+  const addTask = async (text: string) => {
     const taskText = text.trim();
     if (!taskText) return;
 
-    const newTask: Task = {
-      id: Date.now() + Math.random(),
-      text: taskText,
-      time: getCurrentTime(),
-    };
-
-    setTasks((prev) => [...prev, newTask]);
-    setInput("");
+    try {
+      const newTask = await tasksApi.createTask(taskText);
+      setTasks((prev) => [...prev, newTask]);
+      setInput("");
+    } catch (error) {
+      alert("할 일을 저장하지 못했습니다. (하루 10개 제한일 수 있습니다)");
+      console.error(error);
+    }
   };
 
   // --- 퀵 액션 로직 ---
@@ -315,7 +334,7 @@ export default function AppPage() {
                       <span className="font-medium text-gray-800 truncate">{task.text}</span>
                     </div>
                     <span className="text-xs font-medium text-gray-400 bg-white px-2 py-1 rounded-full border border-gray-100">
-                      {task.time}
+                      {getFormattedTime(task.createdAt)}
                     </span>
                   </div>
                 ))
