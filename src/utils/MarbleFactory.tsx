@@ -24,26 +24,35 @@ export class MarbleFactory {
   }
 
   /**
-   * 디자인이 적용된 유리구슬(Marble) 객체를 생성합니다.
+   * 디자인이 적용된 유리구슬(Marble) 객체를 생성합니다. (랜덤 색상)
    * @param x 시작 x 좌표
    * @param y 시작 y 좌표
    * @param radius 반지름 (기본값 24)
    */
   static create(x: number, y: number, radius: number = 24) {
     const color = this.getRandomColor();
+    return this.createWithColor(x, y, radius, color);
+  }
 
+  /**
+   * 지정된 색상으로 유리구슬(Marble) 객체를 생성합니다.
+   * @param x 시작 x 좌표
+   * @param y 시작 y 좌표
+   * @param radius 반지름
+   * @param color 색상 (hex)
+   */
+  static createWithColor(x: number, y: number, radius: number, color: string) {
     return Matter.Bodies.circle(x, y, radius, {
-      restitution: 0.2, // 🏀 탄성 (0~1): 0.9면 유리처럼 잘 튐
-      friction: 0.005,  // 마찰력
-      frictionAir: 0.01, // 공기 저항
+      restitution: 0.2,
+      friction: 0.005,
+      frictionAir: 0.01,
       render: {
-        fillStyle: color, // 기본 색상
+        fillStyle: color,
         strokeStyle: '#ffffff',
         lineWidth: 0,
       },
-      // 커스텀 속성 (렌더링 및 식별용)
       plugin: {
-        marbleColor: color, // ✨ 식별자 변경 (beadColor -> marbleColor)
+        marbleColor: color,
       }
     });
   }

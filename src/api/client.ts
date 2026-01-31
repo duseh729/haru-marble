@@ -1,3 +1,5 @@
+// supabase로 인해 현재는 사용하지 않는 파일 
+// 2026.01.27
 const BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:4000/api";
 
 export const apiClient = {

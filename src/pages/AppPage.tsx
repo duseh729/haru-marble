@@ -4,20 +4,21 @@ import PhysicsJar from "../components/PhysicsJar";
 import { Button } from "@/components/ui/button";
 import { Plus, X, Zap, Check, Trash2, History, CalendarDays } from "lucide-react"; // History, CalendarDays 추가
 
-import { tasksApi } from "../api/tasks"; // API 추가
+import { tasksApi, bottlesApi } from "../api/tasks";
+import type { Bottle } from "../api/tasks";
 
 // 태스크 타입 정의
 interface Task {
   id: number;
   text: string;
-  emoji?: string; // API에서 오는 emoji 대응
-  createdAt?: string; // API에서 오는 날짜
+  color?: string; // 구슬 색상
+  emoji?: string;
+  createdAt?: string;
 }
 
 // ... (QuickAction 관련 인터페이스 유지) ...
 interface QuickActionItem {
   id: string;
-  emoji: string;
   text: string;
 }
 
@@ -61,19 +62,45 @@ export default function AppPage() {
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(true);
 
-  // 초기 데이터 로딩
+  // 현재 선택된 Bottle 상태
+  const [currentBottle, setCurrentBottle] = useState<Bottle | null>(null);
+
+  // 초기 데이터 로딩: Bottle 먼저 로드 -> Tasks 로드
   useEffect(() => {
-    loadTasks();
+    initializeApp();
   }, []);
 
-  const loadTasks = async () => {
+  const initializeApp = async () => {
     try {
-      const data = await tasksApi.getTasks();
+      // 1. 유리병 목록 가져오기
+      const bottles = await bottlesApi.getBottles();
+
+      let bottle: Bottle;
+      if (bottles && bottles.length > 0) {
+        // 기존 유리병이 있으면 첫 번째(또는 pinned) 사용
+        bottle = bottles.find(b => b.is_pinned) || bottles[0];
+      } else {
+        // 없으면 기본 유리병 생성
+        bottle = await bottlesApi.createBottle("기본 유리병", "내 첫 번째 유리병");
+      }
+
+      setCurrentBottle(bottle);
+
+      // 2. 해당 병의 구슬들 로드
+      await loadTasks(bottle.id);
+    } catch (error) {
+      console.error("Failed to initialize app:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const loadTasks = async (bottleId: number) => {
+    try {
+      const data = await tasksApi.getTasks(bottleId);
       setTasks(data);
     } catch (error) {
       console.error("Failed to load tasks:", error);
-    } finally {
-      setIsLoading(false);
     }
   };
 
@@ -105,10 +132,12 @@ export default function AppPage() {
 
   const addTask = async (text: string) => {
     const taskText = text.trim();
-    if (!taskText) return;
+    if (!taskText || !currentBottle) return;
 
     try {
-      const newTask = await tasksApi.createTask(taskText);
+      // 현재 선택된 bottle의 ID 전달
+      const newTask = await tasksApi.createTask(taskText, currentBottle.id);
+
       setTasks((prev) => [...prev, newTask]);
       setInput("");
     } catch (error) {
@@ -201,7 +230,7 @@ export default function AppPage() {
           <div className="w-[260px] h-8 bg-gray-200 from-gray-200/50 to-transparent rounded-xl z-20"></div>
           <div className="rounded-b-[2rem] rounded-t-[50px] relative w-[300px] h-[400px] bg-white border-4 border-gray-200 shadow-lg overflow-hidden z-10">
             <div className="absolute inset-0 flex justify-center items-end px-1">
-              <PhysicsJar taskCount={tasks.length} />
+              <PhysicsJar marbles={tasks} />
             </div>
           </div>
           <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[320px] h-[420px] bg-blue-100/50 rounded-full blur-3xl -z-10"></div>
@@ -233,7 +262,7 @@ export default function AppPage() {
       {/* --- 모달 1: 자주 하는 일 (Quick Actions) --- */}
       {isQuickActionModalOpen && (
         <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/50 backdrop-blur-sm p-4 animate-in fade-in duration-200">
-          <div 
+          <div
             className="bg-white w-full max-w-sm rounded-3xl p-6 shadow-2xl animate-in slide-in-from-bottom-10 flex flex-col max-h-[85vh]"
             onClick={(e) => e.stopPropagation()}
           >
@@ -245,16 +274,8 @@ export default function AppPage() {
             </div>
 
             <div className="flex gap-2 mb-6 bg-gray-50 p-2 rounded-xl">
-              <input 
-                type="text" 
-                className="w-10 text-center bg-white rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                value={newActionEmoji}
-                onChange={(e) => setNewActionEmoji(e.target.value)}
-                placeholder="✨"
-                maxLength={2}
-              />
-              <input 
-                type="text" 
+              <input
+                type="text"
                 className="flex-1 px-3 py-2 bg-white rounded-lg border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                 value={newActionText}
                 onChange={(e) => setNewActionText(e.target.value)}
@@ -271,19 +292,24 @@ export default function AppPage() {
                 const isSelected = selectedActionIds.includes(action.id);
                 return (
                   <Button
+                    // ... 생략 (key, onClick 등)
                     key={action.id}
-                    variant={isSelected ? "default" : "outline"}
-                    className={`relative h-auto py-4 justify-start space-x-2 pr-8 ${isSelected ? "bg-blue-600 hover:bg-blue-700 border-blue-600" : "border-gray-200 hover:bg-gray-50"}`}
                     onClick={() => toggleSelection(action.id)}
+                    className={`flex items-center justify-between p-6 transition-colors ${isSelected
+                      ? "bg-blue-600 hover:bg-blue-700 text-white border-blue-600 border-1" // 선택 시: 파란 배경 + 흰색 글자
+                      : "bg-white hover:bg-gray-50 text-gray-900 border-gray-200 border-1"  // 미선택 시: 흰색 배경 + 회색 글자
+                      }`}
                   >
-                    <span className="text-lg">{action.emoji}</span>
-                    <span className={`truncate ${isSelected ? "text-white" : "text-gray-700"}`}>{action.text}</span>
-                    {isSelected && <Check className="w-4 h-4 absolute right-3 top-1/2 -translate-y-1/2 text-white" />}
-                    {!isSelected && (
-                      <div role="button" onClick={(e) => deleteQuickAction(action.id, e)} className="absolute right-2 top-1/2 -translate-y-1/2 p-1.5 text-gray-300 hover:text-red-500 hover:bg-red-50 rounded-full transition-colors">
-                        <Trash2 className="w-3.5 h-3.5" />
-                      </div>
-                    )}
+                    <span className="truncate">{action.text}</span>
+
+                    {/* 우측 아이콘 제어 로직 */}
+                    <div className="flex items-center">
+                      {isSelected ? (
+                        <Check className="text-white" /> // 선택 시 체크 (흰색)
+                      ) : (
+                        <Trash2 className="text-gray-300" /> // 미선택 시 휴지통 (회색)
+                      )}
+                    </div>
                   </Button>
                 );
               })}
@@ -303,7 +329,7 @@ export default function AppPage() {
       {/* --- ✨ 모달 2: 오늘의 기록 (History) --- */}
       {isHistoryModalOpen && (
         <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/50 backdrop-blur-sm p-4 animate-in fade-in duration-200">
-          <div 
+          <div
             className="bg-white w-full max-w-sm rounded-3xl p-6 shadow-2xl animate-in slide-in-from-bottom-10 flex flex-col max-h-[80vh]"
             onClick={(e) => e.stopPropagation()}
           >
@@ -342,7 +368,7 @@ export default function AppPage() {
             </div>
 
             <div className="mt-6 pt-6 border-t border-gray-100 text-center">
-               <p className="text-gray-500 text-sm">총 <span className="font-bold text-blue-600 text-lg">{tasks.length}</span>개의 구슬을 모았어요!</p>
+              <p className="text-gray-500 text-sm">총 <span className="font-bold text-blue-600 text-lg">{tasks.length}</span>개의 구슬을 모았어요!</p>
             </div>
           </div>
         </div>

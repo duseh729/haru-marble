@@ -1,16 +1,27 @@
 import { useEffect, useRef } from "react";
 import Matter from "matter-js";
-import { MarbleFactory } from "../utils/MarbleFactory"; // ✨ 경로/이름 변경
+import { MarbleFactory } from "../utils/MarbleFactory"; 
 
-interface PhysicsJarProps {
-  taskCount: number;
+// DB에서 가져온 Task 타입 (색상 포함)
+interface Task {
+  id: number;
+  text: string;
+  color?: string;
+  createdAt?: string;
 }
 
-export default function PhysicsJar({ taskCount }: PhysicsJarProps) {
+interface PhysicsJarProps {
+  // 기존 taskCount 대신 marbles 배열을 받음
+  marbles: Task[];
+}
+
+export default function PhysicsJar({ marbles }: PhysicsJarProps) {
   const sceneRef = useRef<HTMLDivElement>(null);
   const engineRef = useRef<Matter.Engine | null>(null);
   const runnerRef = useRef<Matter.Runner | null>(null);
   const renderRef = useRef<Matter.Render | null>(null);
+  // 이미 렌더링된 구슬 ID 추적
+  const renderedIdsRef = useRef<Set<number>>(new Set());
 
   useEffect(() => {
     if (!sceneRef.current) return;
@@ -47,7 +58,6 @@ export default function PhysicsJar({ taskCount }: PhysicsJarProps) {
       const bodies = Matter.Composite.allBodies(engine.world);
 
       bodies.forEach((body) => {
-        // ✨ 속성 이름 변경 확인 (marbleColor)
         if (body.circleRadius && body.plugin.marbleColor) {
           const { x, y } = body.position;
           const radius = body.circleRadius;
@@ -72,7 +82,7 @@ export default function PhysicsJar({ taskCount }: PhysicsJarProps) {
           context.fillStyle = gradient;
           context.fill();
 
-          // 2. 외곽선 (선택 사항)
+          // 2. 외곽선
           context.strokeStyle = "rgba(255,255,255,0.4)";
           context.lineWidth = 2;
           context.stroke();
@@ -115,30 +125,31 @@ export default function PhysicsJar({ taskCount }: PhysicsJarProps) {
       if (render.canvas) render.canvas.remove();
       World.clear(engine.world, false);
       Engine.clear(engine);
+      renderedIdsRef.current.clear();
     };
   }, []);
 
-  // 구슬 추가 로직
+  // 구슬 추가 로직 - DB 색상 사용
   useEffect(() => {
     if (!engineRef.current || !renderRef.current) return;
 
-    const currentBodies = Matter.Composite.allBodies(
-      engineRef.current.world
-    ).filter((b) => !b.isStatic);
-    const bodiesToAdd = taskCount - currentBodies.length;
+    // 새로 추가된 구슬만 렌더링
+    const newMarbles = marbles.filter(m => !renderedIdsRef.current.has(m.id));
 
-    if (bodiesToAdd > 0) {
-      for (let i = 0; i < bodiesToAdd; i++) {
-        // ✨ MarbleFactory 사용
-        const marble = MarbleFactory.create(
-          150 + (Math.random() - 0.5) * 50,
-          -50 - i * 30,
-          22
-        );
-        Matter.World.add(engineRef.current.world, marble);
-      }
-    }
-  }, [taskCount]);
+    newMarbles.forEach((task, i) => {
+      // DB에 저장된 색상 사용, 없으면 랜덤 생성
+      const color = task.color || MarbleFactory.getRandomColor();
+
+      const marble = MarbleFactory.createWithColor(
+        150 + (Math.random() - 0.5) * 50,
+        -50 - i * 30,
+        22,
+        color
+      );
+      Matter.World.add(engineRef.current!.world, marble);
+      renderedIdsRef.current.add(task.id);
+    });
+  }, [marbles]);
 
   return (
     <div
