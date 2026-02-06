@@ -223,6 +223,24 @@ export default function AppPage() {
               <History className="w-5 h-5 text-gray-500" />
             </Button>
           </div>
+
+          {/* 할 일 입력 영역 */}
+          <div className="flex items-center bg-white rounded-xl p-2 mt-4 shadow-sm border border-gray-100">
+            <input
+              type="text"
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              onKeyDown={(e) => e.key === "Enter" && addTask(input)}
+              placeholder="할 일을 입력하세요..."
+              className="flex-1 bg-transparent outline-none px-2 text-gray-700 placeholder-gray-400"
+            />
+            <button
+              onClick={() => addTask(input)}
+              className="bg-blue-500 text-white p-2 rounded-full hover:bg-blue-600 transition-colors"
+            >
+              <Plus />
+            </button>
+          </div>
         </header>
 
         {/* --- 메인 유리병 --- */}
@@ -236,27 +254,6 @@ export default function AppPage() {
           <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[320px] h-[420px] bg-blue-100/50 rounded-full blur-3xl -z-10"></div>
         </main>
 
-        {/* --- 하단 리스트 --- */}
-        <section className="bg-white rounded-t-3xl p-6 -mx-6 -mb-6 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)]">
-          <h2 className="text-sm font-semibold text-gray-500 mb-3">새로운 할 일</h2>
-          <div className="flex items-center bg-gray-100 rounded-full p-2 mb-6">
-            <button className="p-2 text-gray-400"><Plus /></button>
-            <input
-              type="text"
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-              onKeyDown={(e) => e.key === "Enter" && addTask(input)}
-              placeholder="할 일을 입력하세요..."
-              className="flex-1 bg-transparent outline-none px-2 text-gray-700 placeholder-gray-400"
-            />
-            <button
-              onClick={() => addTask(input)}
-              className="bg-blue-500 text-white p-2 rounded-full hover:bg-blue-600 transition-colors"
-            >
-              <Icons.Send />
-            </button>
-          </div>
-        </section>
       </div>
 
       {/* --- 모달 1: 자주 하는 일 (Quick Actions) --- */}
