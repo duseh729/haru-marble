@@ -1,8 +1,9 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Helmet } from "react-helmet-async";
 import PhysicsJar from "../components/PhysicsJar";
 import { Button } from "@/components/ui/button";
-import { Plus, X, Zap, Check, Trash2, History, CalendarDays } from "lucide-react"; // History, CalendarDays 추가
+import { Plus, X, Zap, Check, Trash2, History, CalendarDays } from "lucide-react";
+import { MARBLE_COLORS } from "../utils/MarbleFactory";
 
 import { tasksApi, bottlesApi } from "../api/tasks";
 import type { Bottle } from "../api/tasks";
@@ -61,6 +62,26 @@ export default function AppPage() {
   const [tasks, setTasks] = useState<Task[]>([]);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(true);
+  const [selectedColor, setSelectedColor] = useState<string | null>(null); // 선택된 구슬 색상
+  const [showColorPicker, setShowColorPicker] = useState(false); // 색상 피커 표시 여부
+  const colorPickerRef = useRef<HTMLDivElement>(null); // 색상 피커 ref
+
+  // 색상 피커 외부 클릭 시 닫기
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (colorPickerRef.current && !colorPickerRef.current.contains(event.target as Node)) {
+        setShowColorPicker(false);
+      }
+    };
+
+    if (showColorPicker) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [showColorPicker]);
 
   // 현재 선택된 Bottle 상태
   const [currentBottle, setCurrentBottle] = useState<Bottle | null>(null);
@@ -135,8 +156,8 @@ export default function AppPage() {
     if (!taskText || !currentBottle) return;
 
     try {
-      // 현재 선택된 bottle의 ID 전달
-      const newTask = await tasksApi.createTask(taskText, currentBottle.id);
+      // 현재 선택된 bottle의 ID와 색상 전달
+      const newTask = await tasksApi.createTask(taskText, currentBottle.id, selectedColor || undefined);
 
       setTasks((prev) => [...prev, newTask]);
       setInput("");
@@ -190,14 +211,14 @@ export default function AppPage() {
       <div>
         {/* --- 상단 헤더 --- */}
         <header className="mb-6">
-          <div className="flex justify-between items-start mb-2">
+          <div className="flex justify-between items-center mb-2">
             <div className="">
-              <h1 className="text-3xl font-bold text-gray-900">Done-List</h1>
+              <h1 className="text-3xl font-bold text-gray-900">하루마블</h1>
               <p className="text-gray-600">오늘의 성취를 담다</p>
             </div>
-            <div className="flex items-center space-x-2 bg-white rounded-full px-4 py-2 shadow-sm">
+            <div className="flex items-center space-x-2 bg-white rounded-xl px-4 py-2 shadow-sm">
               <Icons.Trophy />
-              <span className="font-bold text-gray-800">{tasks.length}</span>
+              <span className="font-bold text-gray-800">내 유리병</span>
             </div>
           </div>
 
@@ -206,40 +227,73 @@ export default function AppPage() {
             {/* 1. 자주 하는 일 버튼 (왼쪽, 넓게) */}
             <Button
               variant="outline"
-              className="flex-1 flex items-center justify-center space-x-2 h-12 rounded-xl border-dashed border-2 hover:border-solid hover:bg-gray-50"
+              className="flex-1 flex items-center justify-center h-12 rounded-xl border-2 hover:border-solid hover:bg-gray-50"
               onClick={() => setIsQuickActionModalOpen(true)}
             >
               <Zap className="w-4 h-4 text-yellow-500" />
-              <span className="text-gray-600">자주 하는 일 관리</span>
+              <span className="text-gray-600">자주 하는 일</span>
             </Button>
 
             {/* 2. 오늘 한 일 기록 보기 버튼 (오른쪽, 아이콘) */}
             <Button
               variant="outline"
-              className="w-14 h-12 rounded-xl border-2 hover:bg-gray-50 flex items-center justify-center"
+              className="flex-1 h-12 rounded-xl border-2 hover:bg-gray-50 flex items-center justify-center"
               onClick={() => setIsHistoryModalOpen(true)}
               title="오늘의 기록 보기"
             >
               <History className="w-5 h-5 text-gray-500" />
+              <span className="text-gray-600">완료한 일</span>
             </Button>
           </div>
 
           {/* 할 일 입력 영역 */}
-          <div className="flex items-center bg-white rounded-xl p-2 mt-4 shadow-sm border border-gray-100">
-            <input
-              type="text"
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-              onKeyDown={(e) => e.key === "Enter" && addTask(input)}
-              placeholder="할 일을 입력하세요..."
-              className="flex-1 bg-transparent outline-none px-2 text-gray-700 placeholder-gray-400"
-            />
-            <button
-              onClick={() => addTask(input)}
-              className="bg-blue-500 text-white p-2 rounded-full hover:bg-blue-600 transition-colors"
-            >
-              <Plus />
-            </button>
+          <div className="relative" ref={colorPickerRef}>
+            <div className="flex items-center bg-white rounded-xl p-2 mt-4 shadow-sm border border-gray-100">
+              {/* 색상 선택 버튼 */}
+              <div className="bg-gray-100 rounded-lg p-1 flex items-center justify-center">
+                <button
+                  onClick={() => setShowColorPicker(!showColorPicker)}
+                  className="w-8 h-8 rounded-full border-2 border-white shadow-sm transition-transform"
+                  style={{ backgroundColor: selectedColor || MARBLE_COLORS[0] }}
+                  title="구슬 색상 선택"
+                />
+              </div>
+              <input
+                type="text"
+                value={input}
+                onChange={(e) => setInput(e.target.value)}
+                onKeyDown={(e) => e.key === "Enter" && addTask(input)}
+                placeholder="완료한 일을 입력하세요."
+                className="flex-1 bg-transparent outline-none px-2 text-gray-700 placeholder-gray-400"
+              />
+              <button
+                onClick={() => addTask(input)}
+                className="bg-black text-white p-2 rounded-full hover:bg-blue-600 transition-colors"
+              >
+                <Plus />
+              </button>
+            </div>
+
+            {/* 색상 피커 드롭다운 */}
+            {showColorPicker && (
+              <div className="absolute left-0 right-0 mt-2 bg-white rounded-xl p-3 shadow-lg border border-gray-100 z-30 animate-in fade-in slide-in-from-top-2 duration-200">
+                <div className="flex flex-wrap gap-2 justify-center">
+                  {MARBLE_COLORS.map((color) => (
+                    <button
+                      key={color}
+                      onClick={() => {
+                        setSelectedColor(color);
+                        setShowColorPicker(false);
+                      }}
+                      className={`w-8 h-8 rounded-full transition-transform hover:scale-125 ${selectedColor === color ? 'ring-2 ring-blue-500 ring-offset-2' : ''
+                        }`}
+                      style={{ backgroundColor: color }}
+                      title={color}
+                    />
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
         </header>
 

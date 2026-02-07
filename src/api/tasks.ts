@@ -30,7 +30,7 @@ export const tasksApi = {
       .from("marbles")
       .select("*")
       .order("created_at", { ascending: false });
-    
+
     // bottleId가 있으면 필터링
     if (bottleId) {
       query.eq("bottle_id", bottleId);
@@ -39,7 +39,7 @@ export const tasksApi = {
     const { data, error } = await query;
 
     if (error) throw error;
-    
+
     // 기존 Task 형태로 변환
     return (data || []).map((marble: Marble) => ({
       id: marble.id,
@@ -50,14 +50,14 @@ export const tasksApi = {
   },
 
   // 구슬 넣기 (기존 createTask 대체)
-  createTask: async (text: string, bottleId?: number) => {
-    const marbleColor = MarbleFactory.getRandomColor();
+  createTask: async (text: string, bottleId?: number, color?: string) => {
+    const marbleColor = color || MarbleFactory.getRandomColor();
 
     const insertData: { content: string; color: string; bottle_id?: number } = {
       content: text,
       color: marbleColor,
     };
-    
+
     if (bottleId) {
       insertData.bottle_id = bottleId;
     }
@@ -69,7 +69,7 @@ export const tasksApi = {
       .single();
 
     if (error) throw error;
-    
+
     // 기존 Task 형태로 반환
     return {
       id: data.id,
@@ -85,7 +85,7 @@ export const tasksApi = {
       .from("marbles")
       .delete()
       .eq("id", taskId);
-      
+
     if (error) throw error;
   }
 };
@@ -129,7 +129,7 @@ export const bottlesApi = {
           user_id: user.id,
           title: title,
           description: description,
-          is_pinned: false, 
+          is_pinned: false,
         },
       ])
       .select()
@@ -145,7 +145,7 @@ export const bottlesApi = {
       .from("bottles")
       .delete()
       .eq("id", bottleId);
-      
+
     if (error) throw error;
   },
 
@@ -198,14 +198,14 @@ export const marblesApi = {
     if (error) throw error;
     return data as Marble;
   },
-  
+
   // 구슬 삭제
   deleteMarble: async (marbleId: number) => {
     const { error } = await supabase
       .from("marbles")
       .delete()
       .eq("id", marbleId);
-      
+
     if (error) throw error;
   }
 };
