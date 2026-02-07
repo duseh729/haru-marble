@@ -1,6 +1,6 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import Matter from "matter-js";
-import { MarbleFactory } from "../utils/MarbleFactory"; 
+import { MarbleFactory } from "../utils/MarbleFactory";
 
 // DB에서 가져온 Task 타입 (색상 포함)
 interface Task {
@@ -15,6 +15,13 @@ interface PhysicsJarProps {
   marbles: Task[];
 }
 
+// 툴팁 정보 타입
+interface TooltipInfo {
+  text: string;
+  x: number;
+  y: number;
+}
+
 export default function PhysicsJar({ marbles }: PhysicsJarProps) {
   const sceneRef = useRef<HTMLDivElement>(null);
   const engineRef = useRef<Matter.Engine | null>(null);
@@ -22,6 +29,11 @@ export default function PhysicsJar({ marbles }: PhysicsJarProps) {
   const renderRef = useRef<Matter.Render | null>(null);
   // 이미 렌더링된 구슬 ID 추적
   const renderedIdsRef = useRef<Set<number>>(new Set());
+  // 구슬 body와 task 매핑
+  const marbleMapRef = useRef<Map<Matter.Body, Task>>(new Map());
+
+  // 툴팁 상태
+  const [tooltip, setTooltip] = useState<TooltipInfo | null>(null);
 
   useEffect(() => {
     if (!sceneRef.current) return;
@@ -31,7 +43,8 @@ export default function PhysicsJar({ marbles }: PhysicsJarProps) {
       World = Matter.World,
       Bodies = Matter.Bodies,
       Runner = Matter.Runner,
-      Events = Matter.Events;
+      Events = Matter.Events,
+      Query = Matter.Query;
 
     const engine = Engine.create();
     engineRef.current = engine;
@@ -51,6 +64,34 @@ export default function PhysicsJar({ marbles }: PhysicsJarProps) {
       },
     });
     renderRef.current = render;
+
+    // 마우스 클릭 이벤트 핸들러
+    const handleClick = (e: MouseEvent) => {
+      const rect = render.canvas.getBoundingClientRect();
+      const scaleX = render.canvas.width / rect.width;
+      const scaleY = render.canvas.height / rect.height;
+      const mouseX = (e.clientX - rect.left) * scaleX / 2; // pixelRatio 보정
+      const mouseY = (e.clientY - rect.top) * scaleY / 2;
+
+      const bodies = Matter.Composite.allBodies(engine.world);
+      const clickedBodies = Query.point(bodies, { x: mouseX, y: mouseY });
+
+      if (clickedBodies.length > 0) {
+        const clickedBody = clickedBodies[0];
+        const task = marbleMapRef.current.get(clickedBody);
+        if (task) {
+          // 구슬 위치에 툴팁 표시 (캔버스 좌표를 div 좌표로 변환)
+          setTooltip({
+            text: task.text,
+            x: clickedBody.position.x,
+            y: clickedBody.position.y - 35, // 구슬 위에 표시
+          });
+        }
+      } else {
+        setTooltip(null); // 빈 영역 클릭 시 툴팁 숨김
+      }
+    };
+    render.canvas.addEventListener('click', handleClick);
 
     // --- ✨ 커스텀 렌더링: 유리구슬 광택 효과 ---
     Events.on(render, "afterRender", () => {
@@ -120,12 +161,14 @@ export default function PhysicsJar({ marbles }: PhysicsJarProps) {
     Runner.run(runner, engine);
 
     return () => {
+      render.canvas.removeEventListener('click', handleClick);
       Render.stop(render);
       Runner.stop(runner);
       if (render.canvas) render.canvas.remove();
       World.clear(engine.world, false);
       Engine.clear(engine);
       renderedIdsRef.current.clear();
+      marbleMapRef.current.clear();
     };
   }, []);
 
@@ -148,6 +191,7 @@ export default function PhysicsJar({ marbles }: PhysicsJarProps) {
       );
       Matter.World.add(engineRef.current!.world, marble);
       renderedIdsRef.current.add(task.id);
+      marbleMapRef.current.set(marble, task); // body와 task 매핑
     });
   }, [marbles]);
 
@@ -159,7 +203,35 @@ export default function PhysicsJar({ marbles }: PhysicsJarProps) {
         height: "100%",
         display: "flex",
         justifyContent: "center",
+        position: "relative",
       }}
-    />
+    >
+      {/* 툴팁 오버레이 */}
+      {tooltip && (
+        <div
+          style={{
+            position: "absolute",
+            left: tooltip.x,
+            top: tooltip.y,
+            transform: "translate(-50%, -70%)",
+            backgroundColor: "rgba(0, 0, 0, 0.8)",
+            color: "white",
+            padding: "6px 12px",
+            borderRadius: "8px",
+            fontSize: "12px",
+            fontWeight: "500",
+            whiteSpace: "nowrap",
+            maxWidth: "200px",
+            overflow: "hidden",
+            textOverflow: "ellipsis",
+            zIndex: 10,
+            pointerEvents: "none",
+            boxShadow: "0 2px 8px rgba(0,0,0,0.2)",
+          }}
+        >
+          {tooltip.text}
+        </div>
+      )}
+    </div>
   );
 }
