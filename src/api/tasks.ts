@@ -79,6 +79,34 @@ export const tasksApi = {
     };
   },
 
+  // 구슬 수정 (내용, 색상 변경 가능)
+  updateTask: async (taskId: number, updates: { text?: string; color?: string }) => {
+    const updateData: { content?: string; color?: string } = {};
+
+    if (updates.text !== undefined) {
+      updateData.content = updates.text;
+    }
+    if (updates.color !== undefined) {
+      updateData.color = updates.color;
+    }
+
+    const { data, error } = await supabase
+      .from("marbles")
+      .update(updateData)
+      .eq("id", taskId)
+      .select()
+      .single();
+
+    if (error) throw error;
+
+    return {
+      id: data.id,
+      text: data.content,
+      color: data.color,
+      createdAt: data.created_at,
+    };
+  },
+
   // 구슬 삭제
   deleteTask: async (taskId: number) => {
     const { error } = await supabase
