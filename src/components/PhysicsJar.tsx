@@ -1,18 +1,20 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useCallback } from "react";
 import Matter from "matter-js";
 import { MarbleFactory } from "../utils/MarbleFactory";
 
-// DB에서 가져온 Task 타입 (색상 포함)
+// DB에서 가져온 Task 타입 (색상 + 좌표 포함)
 interface Task {
   id: number;
   text: string;
   color?: string;
   createdAt?: string;
+  position_x?: number;
+  position_y?: number;
 }
 
 interface PhysicsJarProps {
-  // 기존 taskCount 대신 marbles 배열을 받음
   marbles: Task[];
+  onPositionsSettled?: (positions: { id: number; position_x: number; position_y: number }[]) => void;
 }
 
 // 툴팁 정보 타입
@@ -22,7 +24,7 @@ interface TooltipInfo {
   y: number;
 }
 
-export default function PhysicsJar({ marbles }: PhysicsJarProps) {
+export default function PhysicsJar({ marbles, onPositionsSettled }: PhysicsJarProps) {
   const sceneRef = useRef<HTMLDivElement>(null);
   const engineRef = useRef<Matter.Engine | null>(null);
   const runnerRef = useRef<Matter.Runner | null>(null);
@@ -31,9 +33,50 @@ export default function PhysicsJar({ marbles }: PhysicsJarProps) {
   const renderedIdsRef = useRef<Set<number>>(new Set());
   // 구슬 body와 task 매핑
   const marbleMapRef = useRef<Map<Matter.Body, Task>>(new Map());
+  // 정착 감지용 타이머
+  const settleTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  // 이미 보고된 좌표인지 추적
+  const lastReportedRef = useRef<string>("");
 
   // 툴팁 상태
   const [tooltip, setTooltip] = useState<TooltipInfo | null>(null);
+
+  // 구슬이 모두 멈췄는지 확인하고 좌표 보고
+  const checkSettled = useCallback(() => {
+    if (!engineRef.current || !onPositionsSettled) return;
+
+    const bodies = Matter.Composite.allBodies(engineRef.current.world);
+    const marbleBodies = bodies.filter((b: Matter.Body) => b.circleRadius && marbleMapRef.current.has(b));
+
+    if (marbleBodies.length === 0) return;
+
+    // 모든 구슬이 거의 정지 상태인지 확인 (속도가 매우 낮은 경우)
+    const allSettled = marbleBodies.every((b: Matter.Body) => {
+      const speed = Math.sqrt(b.velocity.x ** 2 + b.velocity.y ** 2);
+      return speed < 0.1;
+    });
+
+    if (allSettled) {
+      const positions = marbleBodies
+        .map((body: Matter.Body) => {
+          const task = marbleMapRef.current.get(body);
+          if (!task) return null;
+          return {
+            id: task.id,
+            position_x: Math.round(body.position.x * 100) / 100,
+            position_y: Math.round(body.position.y * 100) / 100,
+          };
+        })
+        .filter((p): p is { id: number; position_x: number; position_y: number } => p !== null);
+
+      // 이전에 보고한 좌표와 같으면 스킵
+      const posKey = JSON.stringify(positions);
+      if (posKey !== lastReportedRef.current) {
+        lastReportedRef.current = posKey;
+        onPositionsSettled(positions);
+      }
+    }
+  }, [onPositionsSettled]);
 
   useEffect(() => {
     if (!sceneRef.current) return;
@@ -46,7 +89,10 @@ export default function PhysicsJar({ marbles }: PhysicsJarProps) {
       Events = Matter.Events,
       Query = Matter.Query;
 
-    const engine = Engine.create();
+    // sleeping 활성화
+    const engine = Engine.create({
+      enableSleeping: true,
+    });
     engineRef.current = engine;
 
     const width = sceneRef.current.clientWidth;
@@ -70,7 +116,7 @@ export default function PhysicsJar({ marbles }: PhysicsJarProps) {
       const rect = render.canvas.getBoundingClientRect();
       const scaleX = render.canvas.width / rect.width;
       const scaleY = render.canvas.height / rect.height;
-      const mouseX = (e.clientX - rect.left) * scaleX / 2; // pixelRatio 보정
+      const mouseX = (e.clientX - rect.left) * scaleX / 2;
       const mouseY = (e.clientY - rect.top) * scaleY / 2;
 
       const bodies = Matter.Composite.allBodies(engine.world);
@@ -80,15 +126,14 @@ export default function PhysicsJar({ marbles }: PhysicsJarProps) {
         const clickedBody = clickedBodies[0];
         const task = marbleMapRef.current.get(clickedBody);
         if (task) {
-          // 구슬 위치에 툴팁 표시 (캔버스 좌표를 div 좌표로 변환)
           setTooltip({
             text: task.text,
             x: clickedBody.position.x,
-            y: clickedBody.position.y - 35, // 구슬 위에 표시
+            y: clickedBody.position.y - 35,
           });
         }
       } else {
-        setTooltip(null); // 빈 영역 클릭 시 툴팁 숨김
+        setTooltip(null);
       }
     };
     render.canvas.addEventListener('click', handleClick);
@@ -104,7 +149,6 @@ export default function PhysicsJar({ marbles }: PhysicsJarProps) {
           const radius = body.circleRadius;
           const color = body.plugin.marbleColor;
 
-          // 1. 입체감 그라데이션 (하이라이트)
           const gradient = context.createRadialGradient(
             x - radius * 0.3,
             y - radius * 0.3,
@@ -114,8 +158,8 @@ export default function PhysicsJar({ marbles }: PhysicsJarProps) {
             radius
           );
 
-          gradient.addColorStop(0, "#FFFFFF"); // 반사광
-          gradient.addColorStop(0.2, color); // 본래 색
+          gradient.addColorStop(0, "#FFFFFF");
+          gradient.addColorStop(0.2, color);
           gradient.addColorStop(1, color);
 
           context.beginPath();
@@ -123,12 +167,38 @@ export default function PhysicsJar({ marbles }: PhysicsJarProps) {
           context.fillStyle = gradient;
           context.fill();
 
-          // 2. 외곽선
           context.strokeStyle = "rgba(255,255,255,0.4)";
           context.lineWidth = 2;
           context.stroke();
         }
       });
+    });
+
+    // 매 업데이트마다 구슬 속도를 체크해서 모두 멈추면 좌표 저장 (디바운스)
+    Events.on(engine, "afterUpdate", () => {
+      const bodies = Matter.Composite.allBodies(engine.world);
+      const mBodies = bodies.filter((b: Matter.Body) => b.circleRadius && marbleMapRef.current.has(b));
+
+      if (mBodies.length === 0) return;
+
+      const allSlow = mBodies.every((b: Matter.Body) => {
+        const speed = Math.sqrt(b.velocity.x ** 2 + b.velocity.y ** 2);
+        return speed < 0.15;
+      });
+
+      if (allSlow) {
+        if (!settleTimerRef.current) {
+          settleTimerRef.current = setTimeout(() => {
+            settleTimerRef.current = null;
+            checkSettled();
+          }, 1000);
+        }
+      } else {
+        if (settleTimerRef.current) {
+          clearTimeout(settleTimerRef.current);
+          settleTimerRef.current = null;
+        }
+      }
     });
 
     // 유리병 벽 (투명)
@@ -161,6 +231,7 @@ export default function PhysicsJar({ marbles }: PhysicsJarProps) {
     Runner.run(runner, engine);
 
     return () => {
+      if (settleTimerRef.current) clearTimeout(settleTimerRef.current);
       render.canvas.removeEventListener('click', handleClick);
       Render.stop(render);
       Runner.stop(runner);
@@ -172,26 +243,23 @@ export default function PhysicsJar({ marbles }: PhysicsJarProps) {
     };
   }, []);
 
-  // 구슬 추가 로직 - DB 색상 사용
+  // 구슬 추가 로직 - DB 좌표가 있으면 해당 위치에, 없으면 위에서 떨어트림
   useEffect(() => {
     if (!engineRef.current || !renderRef.current) return;
 
-    // 새로 추가된 구슬만 렌더링
     const newMarbles = marbles.filter(m => !renderedIdsRef.current.has(m.id));
 
     newMarbles.forEach((task, i) => {
-      // DB에 저장된 색상 사용, 없으면 랜덤 생성
       const color = task.color || MarbleFactory.getRandomColor();
 
-      const marble = MarbleFactory.createWithColor(
-        150 + (Math.random() - 0.5) * 50,
-        -50 - i * 30,
-        22,
-        color
-      );
+      // 저장된 좌표가 있으면 해당 위치에, 없으면 위에서 떨어트림
+      const x = task.position_x ?? (150 + (Math.random() - 0.5) * 50);
+      const y = task.position_y ?? (-50 - i * 30);
+
+      const marble = MarbleFactory.createWithColor(x, y, 22, color);
       Matter.World.add(engineRef.current!.world, marble);
       renderedIdsRef.current.add(task.id);
-      marbleMapRef.current.set(marble, task); // body와 task 매핑
+      marbleMapRef.current.set(marble, task);
     });
   }, [marbles]);
 

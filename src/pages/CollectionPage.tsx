@@ -102,24 +102,47 @@ export default function CollectionPage() {
                                             className="flex flex-col items-center group"
                                         >
                                             {/* 유리병 카드 */}
-                                            <div className="w-full aspect-3/4 bg-gray-50 rounded-2xl border border-gray-100 p-3 flex flex-col items-center justify-end relative overflow-hidden transition-all group-hover:shadow-md group-hover:bg-gray-100/80 group-hover:-translate-y-1">
-                                                {/* 구슬들 - 모든 구슬 표시 */}
-                                                <div className="flex flex-wrap gap-1 justify-center items-end w-full">
-                                                    {bottle.marbles.map((marble) => (
-                                                        <div
-                                                            key={marble.id}
-                                                            className="rounded-full shadow-sm"
-                                                            style={{
-                                                                backgroundColor: marble.color || "#9CA3AF",
-                                                                width: bottle.marbles.length > 12 ? "10px" : bottle.marbles.length > 6 ? "12px" : "16px",
-                                                                height: bottle.marbles.length > 12 ? "10px" : bottle.marbles.length > 6 ? "12px" : "16px",
-                                                            }}
-                                                        />
-                                                    ))}
-                                                    {bottle.marbles.length === 0 && (
-                                                        <span className="text-gray-300 text-xs">비어있음</span>
-                                                    )}
-                                                </div>
+                                            <div className="w-full aspect-3/4 bg-gray-50 rounded-2xl border border-gray-100 flex flex-col items-center justify-end relative overflow-hidden transition-all group-hover:shadow-md group-hover:bg-gray-100/80 group-hover:-translate-y-1">
+                                                {/* 구슬들 - 좌표 기반 배치 */}
+                                                {bottle.marbles.length > 0 ? (
+                                                    bottle.marbles.some(m => m.position_x != null) ? (
+                                                        /* 좌표가 있으면 실제 위치 반영 (300x400 → 카드 크기로 스케일링) */
+                                                        bottle.marbles.map((marble) => {
+                                                            const scaledSize = 17;
+                                                            return (
+                                                                <div
+                                                                    key={marble.id}
+                                                                    className="rounded-full shadow-sm absolute"
+                                                                    style={{
+                                                                        backgroundColor: marble.color || "#9CA3AF",
+                                                                        width: `${scaledSize}px`,
+                                                                        height: `${scaledSize}px`,
+                                                                        left: `${((marble.position_x ?? 150) / 300) * 100}%`,
+                                                                        top: `${((marble.position_y ?? 200) / 400) * 100}%`,
+                                                                        transform: "translate(-50%, -50%)",
+                                                                    }}
+                                                                />
+                                                            );
+                                                        })
+                                                    ) : (
+                                                        /* 좌표 없으면 기본 flex 배치 */
+                                                        <div className="flex flex-wrap gap-1 justify-center items-end w-full p-3">
+                                                            {bottle.marbles.map((marble) => (
+                                                                <div
+                                                                    key={marble.id}
+                                                                    className="rounded-full shadow-sm"
+                                                                    style={{
+                                                                        backgroundColor: marble.color || "#9CA3AF",
+                                                                        width: bottle.marbles.length > 12 ? "10px" : bottle.marbles.length > 6 ? "12px" : "16px",
+                                                                        height: bottle.marbles.length > 12 ? "10px" : bottle.marbles.length > 6 ? "12px" : "16px",
+                                                                    }}
+                                                                />
+                                                            ))}
+                                                        </div>
+                                                    )
+                                                ) : (
+                                                    <span className="text-gray-300 text-xs p-3">비어있음</span>
+                                                )}
 
                                                 {/* 유리병 반사광 효과 */}
                                                 <div className="absolute top-0 left-0 w-full h-full pointer-events-none">

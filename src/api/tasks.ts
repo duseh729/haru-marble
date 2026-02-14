@@ -18,6 +18,8 @@ export interface Marble {
   color: string;
   date: string;
   created_at: string;
+  position_x?: number;
+  position_y?: number;
 }
 
 // ---------------------------------------------
@@ -46,6 +48,8 @@ export const tasksApi = {
       text: marble.content,
       color: marble.color,
       createdAt: marble.created_at,
+      position_x: marble.position_x,
+      position_y: marble.position_y,
     }));
   },
 
@@ -118,7 +122,24 @@ export const tasksApi = {
       .eq("id", taskId);
 
     if (error) throw error;
-  }
+  },
+
+  // 구슬 좌표 일괄 업데이트
+  updatePositions: async (positions: { id: number; position_x: number; position_y: number }[]) => {
+    // 각 구슬의 좌표를 개별 업데이트 (Supabase는 bulk upsert 지원)
+    const promises = positions.map(({ id, position_x, position_y }) =>
+      supabase
+        .from("marbles")
+        .update({ position_x, position_y })
+        .eq("id", id)
+    );
+
+    const results = await Promise.all(promises);
+    const errors = results.filter(r => r.error);
+    if (errors.length > 0) {
+      console.error("Failed to update some positions:", errors);
+    }
+  },
 };
 
 // ---------------------------------------------

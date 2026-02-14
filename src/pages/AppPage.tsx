@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { Helmet } from "react-helmet-async";
 import PhysicsJar from "../components/PhysicsJar";
 import { Button } from "@/components/ui/button";
@@ -13,9 +13,11 @@ import { Link } from "react-router-dom";
 interface Task {
   id: number;
   text: string;
-  color?: string; // 구슬 색상
+  color?: string;
   emoji?: string;
   createdAt?: string;
+  position_x?: number;
+  position_y?: number;
 }
 
 // ... (QuickAction 관련 인터페이스 유지) ...
@@ -252,6 +254,18 @@ export default function AppPage() {
     }
   };
 
+  // 구슬 좌표 정착 시 Supabase에 저장
+  const handlePositionsSettled = useCallback(
+    async (positions: { id: number; position_x: number; position_y: number }[]) => {
+      try {
+        await tasksApi.updatePositions(positions);
+      } catch (error) {
+        console.error("Failed to save marble positions:", error);
+      }
+    },
+    []
+  );
+
   return (
     <div className="w-full flex justify-center">
       <Helmet>
@@ -354,7 +368,7 @@ export default function AppPage() {
           <div className="w-[260px] h-8 bg-gray-200 from-gray-200/50 to-transparent rounded-xl z-20"></div>
           <div className="rounded-b-[2rem] rounded-t-[50px] relative w-[300px] h-[400px] bg-white border-4 border-gray-200 shadow-lg overflow-hidden z-10">
             <div className="absolute inset-0 flex justify-center items-end px-1">
-              <PhysicsJar marbles={tasks} />
+              <PhysicsJar marbles={tasks} onPositionsSettled={handlePositionsSettled} />
             </div>
           </div>
           <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[320px] h-[420px] bg-blue-100/50 rounded-full blur-3xl -z-10"></div>
