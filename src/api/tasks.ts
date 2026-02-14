@@ -81,7 +81,7 @@ export const tasksApi = {
 
   // 구슬 수정 (내용, 색상 변경 가능)
   updateTask: async (taskId: number, updates: { text?: string; color?: string }) => {
-    const updateData: { content?: string; color?: string } = {};
+    const updateData: { content?: string; color?: string; created_at?: string } = {};
 
     if (updates.text !== undefined) {
       updateData.content = updates.text;
@@ -89,6 +89,9 @@ export const tasksApi = {
     if (updates.color !== undefined) {
       updateData.color = updates.color;
     }
+
+    // 수정 시 시간도 현재 시간으로 업데이트
+    updateData.created_at = new Date().toISOString();
 
     const { data, error } = await supabase
       .from("marbles")

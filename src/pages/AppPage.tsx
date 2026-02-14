@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { Helmet } from "react-helmet-async";
 import PhysicsJar from "../components/PhysicsJar";
 import { Button } from "@/components/ui/button";
-import { Plus, X, Zap, Check, Trash2, History, CalendarDays } from "lucide-react";
+import { Plus, X, Zap, Check, Trash2, History, CalendarDays, Pencil } from "lucide-react";
 import { MARBLE_COLORS } from "../utils/MarbleFactory";
 
 import { tasksApi, bottlesApi } from "../api/tasks";
@@ -146,9 +146,12 @@ export default function AppPage() {
 
   const getFormattedTime = (dateString?: string) => {
     const date = dateString ? new Date(dateString) : new Date();
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const day = String(date.getDate()).padStart(2, "0");
     const hours = String(date.getHours()).padStart(2, "0");
     const minutes = String(date.getMinutes()).padStart(2, "0");
-    return `${hours}:${minutes}`;
+    return `${year}.${month}.${day} ${hours}:${minutes}`;
   };
 
   const addTask = async (text: string) => {
@@ -200,6 +203,43 @@ export default function AppPage() {
     selectedItems.forEach(item => addTask(item.text));
     setSelectedActionIds([]);
     setIsQuickActionModalOpen(false);
+  };
+
+  // --- 구슬 수정/삭제 로직 ---
+  const [editingTask, setEditingTask] = useState<{ id: number; text: string } | null>(null);
+  const [deleteTargetId, setDeleteTargetId] = useState<number | null>(null);
+
+  const handleDeleteTask = (taskId: number) => {
+    setDeleteTargetId(taskId);
+  };
+
+  const confirmDelete = async () => {
+    if (deleteTargetId === null) return;
+    try {
+      await tasksApi.deleteTask(deleteTargetId);
+      setTasks(prev => prev.filter(t => t.id !== deleteTargetId));
+    } catch (error) {
+      console.error("Failed to delete task:", error);
+    } finally {
+      setDeleteTargetId(null);
+    }
+  };
+
+  const handleUpdateTask = async (taskId: number, newText: string) => {
+    if (!newText.trim()) return;
+    const originalTask = tasks.find(t => t.id === taskId);
+    if (originalTask && originalTask.text === newText.trim()) {
+      setEditingTask(null);
+      return;
+    }
+    try {
+      const updated = await tasksApi.updateTask(taskId, { text: newText.trim() });
+      setTasks(prev => prev.map(t => t.id === taskId ? { ...t, text: updated.text, createdAt: updated.createdAt } : t));
+      setEditingTask(null);
+    } catch (error) {
+      console.error("Failed to update task:", error);
+      alert("수정에 실패했습니다.");
+    }
   };
 
   return (
@@ -403,16 +443,56 @@ export default function AppPage() {
                 </div>
               ) : (
                 tasks.slice().reverse().map((task) => (
-                  <div key={task.id} className="flex items-center justify-between p-4 bg-gray-50 rounded-2xl border border-gray-100">
-                    <div className="flex items-center space-x-3 overflow-hidden">
-                      <div className="flex-shrink-0 w-8 h-8 rounded-full bg-green-100 flex items-center justify-center text-green-600">
-                        <Check className="w-4 h-4" />
-                      </div>
-                      <span className="font-medium text-gray-800 truncate">{task.text}</span>
+                  <div key={task.id} className="flex items-start gap-3 p-4 bg-gray-50 rounded-2xl border border-gray-100">
+                    {/* 구슬 색상 원 */}
+                    <div
+                      className="shrink-0 w-8 h-8 rounded-full shadow-sm border-2 border-white mt-0.5"
+                      style={{ backgroundColor: task.color || '#9CA3AF' }}
+                    />
+                    <div className="flex-1 min-w-0">
+                      {editingTask?.id === task.id ? (
+                        <div className="flex items-center gap-2">
+                          <input
+                            type="text"
+                            value={editingTask.text}
+                            onChange={(e) => setEditingTask({ ...editingTask, text: e.target.value })}
+                            onKeyDown={(e) => {
+                              if (e.key === 'Enter') handleUpdateTask(task.id, editingTask.text);
+                              if (e.key === 'Escape') setEditingTask(null);
+                            }}
+                            className="flex-1 min-w-0 px-2 py-1 text-sm border border-blue-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            autoFocus
+                          />
+                          <button onClick={() => handleUpdateTask(task.id, editingTask.text)} className="text-blue-500 hover:text-blue-700">
+                            <Check className="w-4 h-4" />
+                          </button>
+                          <button onClick={() => setEditingTask(null)} className="text-gray-400 hover:text-gray-600">
+                            <X className="w-4 h-4" />
+                          </button>
+                        </div>
+                      ) : (
+                        <div className="flex items-center gap-1">
+                          <span className="font-medium text-gray-800 truncate">{task.text}</span>
+                          <button
+                            onClick={() => setEditingTask({ id: task.id, text: task.text })}
+                            className="shrink-0 p-1 text-gray-400 hover:text-blue-500 hover:bg-blue-50 rounded-lg transition-colors"
+                            title="수정"
+                          >
+                            <Pencil className="w-3.5 h-3.5" />
+                          </button>
+                          <button
+                            onClick={() => handleDeleteTask(task.id)}
+                            className="shrink-0 p-1 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+                            title="삭제"
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                          </button>
+                        </div>
+                      )}
+                      <span className="text-xs text-gray-400 mt-1 block">
+                        {getFormattedTime(task.createdAt)}
+                      </span>
                     </div>
-                    <span className="text-xs font-medium text-gray-400 bg-white px-2 py-1 rounded-full border border-gray-100">
-                      {getFormattedTime(task.createdAt)}
-                    </span>
                   </div>
                 ))
               )}
@@ -420,6 +500,33 @@ export default function AppPage() {
 
             <div className="mt-6 pt-6 border-t border-gray-100 text-center">
               <p className="text-gray-500 text-sm">총 <span className="font-bold text-blue-600 text-lg">{tasks.length}</span>개의 구슬을 모았어요!</p>
+            </div>
+          </div>
+        </div>
+      )}
+      {/* --- 삭제 확인 모달 --- */}
+      {deleteTargetId !== null && (
+        <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/50 backdrop-blur-sm p-4 animate-in fade-in duration-200">
+          <div className="bg-white w-full max-w-[280px] rounded-3xl p-6 shadow-2xl animate-in zoom-in-95 duration-200 text-center">
+            <div className="w-12 h-12 mx-auto mb-4 rounded-full bg-red-100 flex items-center justify-center">
+              <Trash2 className="w-6 h-6 text-red-500" />
+            </div>
+            <h3 className="text-lg font-bold text-gray-900 mb-1">구슬 삭제</h3>
+            <p className="text-sm text-gray-500 mb-6">이 구슬을 정말 삭제할까요?<br />삭제하면 되돌릴 수 없어요.</p>
+            <div className="flex gap-3">
+              <Button
+                variant="outline"
+                className="flex-1 h-12 rounded-xl font-medium"
+                onClick={() => setDeleteTargetId(null)}
+              >
+                취소
+              </Button>
+              <Button
+                className="flex-1 h-12 rounded-xl font-medium bg-red-500 hover:bg-red-600 text-white"
+                onClick={confirmDelete}
+              >
+                삭제
+              </Button>
             </div>
           </div>
         </div>
