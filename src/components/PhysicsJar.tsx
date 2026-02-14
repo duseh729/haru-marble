@@ -218,6 +218,12 @@ export default function PhysicsJar({ marbles, onPositionsSettled, onMarbleClick 
       renderedIdsRef.current.add(task.id);
       marbleMapRef.current.set(marble, task);
     });
+
+    // 기존 구슬의 task 데이터도 최신으로 갱신 (수정 반영)
+    marbleMapRef.current.forEach((oldTask, body) => {
+      const updated = marbles.find(m => m.id === oldTask.id);
+      if (updated) marbleMapRef.current.set(body, updated);
+    });
   }, [marbles]);
 
   // 툴팁 렌더링을 위한 안전한 가드

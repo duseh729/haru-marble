@@ -487,7 +487,7 @@ export default function AppPage() {
                         if (el) {
                           setTimeout(() => {
                             el.scrollIntoView({ behavior: 'instant', block: 'center' });
-                            setTimeout(() => setScrollToTaskId(null), 1500);
+                            setTimeout(() => setScrollToTaskId(null), 100);
                           }, 100);
                         }
                       } : undefined}
