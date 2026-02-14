@@ -192,6 +192,23 @@ export const bottlesApi = {
     if (error) throw error;
     return data as Bottle;
   },
+
+  // 유리병 목록 + 각 병의 모든 구슬 함께 가져오기
+  getBottlesWithMarbles: async () => {
+    const { data, error } = await supabase
+      .from("bottles")
+      .select("*, marbles(*)")
+      .order("created_at", { ascending: true });
+
+    if (error) throw error;
+
+    return (data || []).map((bottle: Bottle & { marbles: Marble[] }) => ({
+      ...bottle,
+      marbles: (bottle.marbles || []).sort(
+        (a: Marble, b: Marble) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
+      ),
+    })) as (Bottle & { marbles: Marble[] })[];
+  },
 };
 
 // ---------------------------------------------

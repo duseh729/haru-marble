@@ -7,6 +7,7 @@ import { MARBLE_COLORS } from "../utils/MarbleFactory";
 
 import { tasksApi, bottlesApi } from "../api/tasks";
 import type { Bottle } from "../api/tasks";
+import { Link } from "react-router-dom";
 
 // 태스크 타입 정의
 interface Task {
@@ -93,13 +94,22 @@ export default function AppPage() {
 
   const initializeApp = async () => {
     try {
-      // 1. 유리병 목록 가져오기
+      // 1. URL에서 bottle ID 확인
+      const params = new URLSearchParams(window.location.search);
+      const bottleIdFromUrl = params.get("bottle");
+
+      // 2. 유리병 목록 가져오기
       const bottles = await bottlesApi.getBottles();
 
       let bottle: Bottle;
       if (bottles && bottles.length > 0) {
-        // 기존 유리병이 있으면 첫 번째(또는 pinned) 사용
-        bottle = bottles.find(b => b.is_pinned) || bottles[0];
+        if (bottleIdFromUrl) {
+          // URL에 bottle ID가 있으면 해당 병 사용
+          bottle = bottles.find(b => b.id === Number(bottleIdFromUrl)) || bottles[0];
+        } else {
+          // 없으면 pinned 또는 첫 번째 사용
+          bottle = bottles.find(b => b.is_pinned) || bottles[0];
+        }
       } else {
         // 없으면 기본 유리병 생성
         bottle = await bottlesApi.createBottle("기본 유리병", "내 첫 번째 유리병");
@@ -256,10 +266,12 @@ export default function AppPage() {
               <h1 className="text-3xl font-bold text-gray-900">하루마블</h1>
               <p className="text-gray-600">오늘의 성취를 담다</p>
             </div>
-            <div className="flex items-center space-x-2 bg-white rounded-xl px-4 py-2 shadow-sm">
-              <Icons.Trophy />
-              <span className="font-bold text-gray-800">내 유리병</span>
-            </div>
+            <Link to="/collection" className="inline-block">
+              <div className="flex items-center space-x-2 bg-white rounded-xl px-4 py-2 shadow-sm hover:bg-gray-50 transition-colors">
+                <Icons.Trophy />
+                <span className="font-bold text-gray-800">내 유리병</span>
+              </div>
+            </Link>
           </div>
 
           {/* ✨ 버튼 영역 수정: Flex로 나란히 배치 */}
