@@ -262,7 +262,7 @@ export default function PhysicsJar({ marbles, onPositionsSettled, onMarbleClick 
           width: "max-content",
           maxWidth: "130px",
           whiteSpace: "normal",
-          wordBreak: "keep-all",
+          wordBreak: "break-all",
           overflowWrap: "break-word",
           lineHeight: "1.4",
           marginBottom: "8px",
