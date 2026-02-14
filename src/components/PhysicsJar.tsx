@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState, useCallback } from "react";
 import Matter from "matter-js";
 import { MarbleFactory } from "../utils/MarbleFactory";
+import { Pencil } from "lucide-react";
 
 // DB에서 가져온 Task 타입 (색상 + 좌표 포함)
 interface Task {
@@ -15,6 +16,7 @@ interface Task {
 interface PhysicsJarProps {
   marbles: Task[];
   onPositionsSettled?: (positions: { id: number; position_x: number; position_y: number }[]) => void;
+  onMarbleClick?: (taskId: number) => void;
 }
 
 // 툴팁 정보 타입
@@ -22,9 +24,10 @@ interface TooltipInfo {
   text: string;
   x: number;
   y: number;
+  taskId: number;
 }
 
-export default function PhysicsJar({ marbles, onPositionsSettled }: PhysicsJarProps) {
+export default function PhysicsJar({ marbles, onPositionsSettled, onMarbleClick }: PhysicsJarProps) {
   const sceneRef = useRef<HTMLDivElement>(null);
   const engineRef = useRef<Matter.Engine | null>(null);
   const runnerRef = useRef<Matter.Runner | null>(null);
@@ -130,6 +133,7 @@ export default function PhysicsJar({ marbles, onPositionsSettled }: PhysicsJarPr
             text: task.text,
             x: clickedBody.position.x,
             y: clickedBody.position.y - 35,
+            taskId: task.id,
           });
         }
       } else {
@@ -279,25 +283,33 @@ export default function PhysicsJar({ marbles, onPositionsSettled }: PhysicsJarPr
         <div
           style={{
             position: "absolute",
-            left: tooltip.x,
+            left: Math.max(40, Math.min(tooltip.x, 250)),
             top: tooltip.y,
-            transform: "translate(-50%, -70%)",
+            transform: "translate(-50%, -100%)",
             backgroundColor: "rgba(0, 0, 0, 0.8)",
             color: "white",
             padding: "6px 12px",
             borderRadius: "8px",
             fontSize: "12px",
             fontWeight: "500",
-            whiteSpace: "nowrap",
-            maxWidth: "200px",
-            overflow: "hidden",
-            textOverflow: "ellipsis",
+            whiteSpace: "normal",
+            wordBreak: "keep-all",
+            maxWidth: "max-content",
+            textAlign: "center",
             zIndex: 10,
-            pointerEvents: "none",
+            pointerEvents: "auto",
+            cursor: "pointer",
             boxShadow: "0 2px 8px rgba(0,0,0,0.2)",
           }}
+          onClick={() => {
+            if (onMarbleClick) onMarbleClick(tooltip.taskId);
+            setTooltip(null);
+          }}
         >
-          {tooltip.text}
+          <span style={{ display: "inline-flex", alignItems: "center", gap: "6px" }}>
+            {tooltip.text}
+            <Pencil style={{ width: "11px", height: "11px", opacity: 0.6, flexShrink: 0, borderBottom: "1px solid white" }} />
+          </span>
         </div>
       )}
     </div>

@@ -141,6 +141,7 @@ export default function AppPage() {
   // --- 모달 상태 관리 ---
   const [isQuickActionModalOpen, setIsQuickActionModalOpen] = useState(false);
   const [isHistoryModalOpen, setIsHistoryModalOpen] = useState(false); // ✨ 기록 모달 상태 추가
+  const [scrollToTaskId, setScrollToTaskId] = useState<number | null>(null);
 
   // 퀵 액션 관련 상태
   const [selectedActionIds, setSelectedActionIds] = useState<string[]>([]);
@@ -266,6 +267,12 @@ export default function AppPage() {
     []
   );
 
+  // 구슬 클릭 시 기록 모달 열고 해당 항목으로 스크롤
+  const handleMarbleClick = useCallback((taskId: number) => {
+    setScrollToTaskId(taskId);
+    setIsHistoryModalOpen(true);
+  }, []);
+
   return (
     <div className="w-full flex justify-center">
       <Helmet>
@@ -368,7 +375,7 @@ export default function AppPage() {
           <div className="w-[260px] h-8 bg-gray-200 from-gray-200/50 to-transparent rounded-xl z-20"></div>
           <div className="rounded-b-[2rem] rounded-t-[50px] relative w-[300px] h-[400px] bg-white border-4 border-gray-200 shadow-lg overflow-hidden z-10">
             <div className="absolute inset-0 flex justify-center items-end px-1">
-              <PhysicsJar marbles={tasks} onPositionsSettled={handlePositionsSettled} />
+              <PhysicsJar marbles={tasks} onPositionsSettled={handlePositionsSettled} onMarbleClick={handleMarbleClick} />
             </div>
           </div>
           <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[320px] h-[420px] bg-blue-100/50 rounded-full blur-3xl -z-10"></div>
@@ -468,59 +475,75 @@ export default function AppPage() {
                   <p>아직 완료한 일이 없어요.</p>
                 </div>
               ) : (
-                tasks.slice().reverse().map((task) => (
-                  <div key={task.id} className="flex items-start gap-3 p-4 bg-gray-50 rounded-2xl border border-gray-100">
-                    {/* 구슬 색상 원 */}
+                tasks.slice().reverse().map((task) => {
+                  const isTarget = task.id === scrollToTaskId;
+                  return (
                     <div
-                      className="shrink-0 w-8 h-8 rounded-full shadow-sm border-2 border-white mt-0.5"
-                      style={{ backgroundColor: task.color || '#9CA3AF' }}
-                    />
-                    <div className="flex-1 min-w-0">
-                      {editingTask?.id === task.id ? (
-                        <div className="flex items-center gap-2">
-                          <input
-                            type="text"
-                            value={editingTask.text}
-                            onChange={(e) => setEditingTask({ ...editingTask, text: e.target.value })}
-                            onKeyDown={(e) => {
-                              if (e.key === 'Enter') handleUpdateTask(task.id, editingTask.text);
-                              if (e.key === 'Escape') setEditingTask(null);
-                            }}
-                            className="flex-1 min-w-0 px-2 py-1 text-sm border border-blue-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                            autoFocus
-                          />
-                          <button onClick={() => handleUpdateTask(task.id, editingTask.text)} className="text-blue-500 hover:text-blue-700">
-                            <Check className="w-4 h-4" />
-                          </button>
-                          <button onClick={() => setEditingTask(null)} className="text-gray-400 hover:text-gray-600">
-                            <X className="w-4 h-4" />
-                          </button>
-                        </div>
-                      ) : (
-                        <div className="flex items-center gap-1">
-                          <span className="font-medium text-gray-800 truncate">{task.text}</span>
-                          <button
-                            onClick={() => setEditingTask({ id: task.id, text: task.text })}
-                            className="shrink-0 p-1 text-gray-400 hover:text-blue-500 hover:bg-blue-50 rounded-lg transition-colors"
-                            title="수정"
-                          >
-                            <Pencil className="w-3.5 h-3.5" />
-                          </button>
-                          <button
-                            onClick={() => handleDeleteTask(task.id)}
-                            className="shrink-0 p-1 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"
-                            title="삭제"
-                          >
-                            <Trash2 className="w-3.5 h-3.5" />
-                          </button>
-                        </div>
-                      )}
-                      <span className="text-xs text-gray-400 mt-1 block">
-                        {getFormattedTime(task.createdAt)}
-                      </span>
+                      key={task.id}
+                      id={`history-task-${task.id}`}
+                      className={`flex items-start gap-3 p-4 rounded-2xl border transition-colors duration-500 ${isTarget ? 'bg-blue-50 border-blue-200' : 'bg-gray-50 border-gray-100'
+                        }`}
+                      ref={isTarget ? (el) => {
+                        if (el) {
+                          setTimeout(() => {
+                            el.scrollIntoView({ behavior: 'instant', block: 'center' });
+                            setTimeout(() => setScrollToTaskId(null), 1500);
+                          }, 100);
+                        }
+                      } : undefined}
+                    >
+                      {/* 구슬 색상 원 */}
+                      <div
+                        className="shrink-0 w-8 h-8 rounded-full shadow-sm border-2 border-white mt-0.5"
+                        style={{ backgroundColor: task.color || '#9CA3AF' }}
+                      />
+                      <div className="flex-1 min-w-0">
+                        {editingTask?.id === task.id ? (
+                          <div className="flex items-center gap-2">
+                            <input
+                              type="text"
+                              value={editingTask.text}
+                              onChange={(e) => setEditingTask({ ...editingTask, text: e.target.value })}
+                              onKeyDown={(e) => {
+                                if (e.key === 'Enter') handleUpdateTask(task.id, editingTask.text);
+                                if (e.key === 'Escape') setEditingTask(null);
+                              }}
+                              className="flex-1 min-w-0 px-2 py-1 text-sm border border-blue-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                              autoFocus
+                            />
+                            <button onClick={() => handleUpdateTask(task.id, editingTask.text)} className="text-blue-500 hover:text-blue-700">
+                              <Check className="w-4 h-4" />
+                            </button>
+                            <button onClick={() => setEditingTask(null)} className="text-gray-400 hover:text-gray-600">
+                              <X className="w-4 h-4" />
+                            </button>
+                          </div>
+                        ) : (
+                          <div className="flex items-center gap-1">
+                            <span className="font-medium text-gray-800 truncate">{task.text}</span>
+                            <button
+                              onClick={() => setEditingTask({ id: task.id, text: task.text })}
+                              className="shrink-0 p-1 text-gray-400 hover:text-blue-500 hover:bg-blue-50 rounded-lg transition-colors"
+                              title="수정"
+                            >
+                              <Pencil className="w-3.5 h-3.5" />
+                            </button>
+                            <button
+                              onClick={() => handleDeleteTask(task.id)}
+                              className="shrink-0 p-1 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+                              title="삭제"
+                            >
+                              <Trash2 className="w-3.5 h-3.5" />
+                            </button>
+                          </div>
+                        )}
+                        <span className="text-xs text-gray-400 mt-1 block">
+                          {getFormattedTime(task.createdAt)}
+                        </span>
+                      </div>
                     </div>
-                  </div>
-                ))
+                  );
+                })
               )}
             </div>
 
