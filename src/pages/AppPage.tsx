@@ -25,10 +25,10 @@ interface QuickActionItem {
 
 // ... (DEFAULT_QUICK_ACTIONS 유지) ...
 const DEFAULT_QUICK_ACTIONS: QuickActionItem[] = [
-  { id: '1', emoji: "💧", text: "물 마시기" },
-  { id: '2', emoji: "🏃", text: "운동하기" },
-  { id: '3', emoji: "📖", text: "책 읽기" },
-  { id: '4', emoji: "💊", text: "영양제" },
+  { id: '1', text: "물 마시기" },
+  { id: '2', text: "운동하기" },
+  { id: '3', text: "책 읽기" },
+  { id: '4', text: "영양제" },
 ];
 
 // ... (Icons 유지) ...
@@ -62,7 +62,7 @@ export default function AppPage() {
   const [tasks, setTasks] = useState<Task[]>([]);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(true);
-  const [selectedColor, setSelectedColor] = useState<string | null>(null); // 선택된 구슬 색상
+  const [selectedColor, setSelectedColor] = useState<string>(MARBLE_COLORS[0]); // 선택된 구슬 색상
   const [showColorPicker, setShowColorPicker] = useState(false); // 색상 피커 표시 여부
   const colorPickerRef = useRef<HTMLDivElement>(null); // 색상 피커 ref
 
