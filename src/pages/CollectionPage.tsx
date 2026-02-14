@@ -37,10 +37,14 @@ export default function CollectionPage() {
         currentPage * ITEMS_PER_PAGE
     );
 
-    // 3개씩 행으로 나누기
+    // 3개씩 행으로 나누기 (최소 3행)
     const rows: BottleWithMarbles[][] = [];
     for (let i = 0; i < paginatedBottles.length; i += 3) {
         rows.push(paginatedBottles.slice(i, i + 3));
+    }
+    // 선반 3줄 고정
+    while (rows.length < 3) {
+        rows.push([]);
     }
 
     const formatDate = (dateString: string) => {
@@ -57,25 +61,17 @@ export default function CollectionPage() {
                 <title>내 컬렉션 - Done List</title>
             </Helmet>
 
-            {/* 헤더 */}
-            <header className="mb-8">
-                <div className="flex items-center justify-between">
-                    <div>
-                        <h1 className="text-3xl font-bold text-gray-900">My Collection</h1>
-                        <p className="text-gray-500 mt-1">{bottles.length}개의 유리병</p>
-                    </div>
-                </div>
-                <div className="mt-4">
-                    <Button
-                        variant="outline"
-                        className="rounded-full px-4 h-10 border-2 hover:bg-gray-50"
-                        onClick={() => navigate("/app")}
-                    >
-                        <ChevronLeft className="w-4 h-4 mr-1" />
-                        <span className="text-gray-700 font-medium">돌아가기</span>
-                    </Button>
-                </div>
-            </header>
+            {/* 돌아가기 버튼 */}
+            <div className="mb-4">
+                <Button
+                    variant="outline"
+                    className="rounded-full px-4 h-10 border-2 hover:bg-gray-50"
+                    onClick={() => navigate("/app")}
+                >
+                    <ChevronLeft className="w-4 h-4 mr-1" />
+                    <span className="text-gray-700 font-medium">돌아가기</span>
+                </Button>
+            </div>
 
             {/* 로딩 */}
             {isLoading ? (
@@ -90,19 +86,21 @@ export default function CollectionPage() {
             ) : (
                 <>
                     {/* 선반 그리드 */}
-                    <div className="space-y-0">
+                    <div className="space-y-6">
                         {rows.map((row, rowIndex) => (
                             <div key={rowIndex}>
                                 {/* 유리병 행 */}
-                                <div className="grid grid-cols-3 gap-3 pb-4 pt-2">
+                                <div className="grid grid-cols-3 gap-3 pb-4">
                                     {row.map((bottle) => (
                                         <button
                                             key={bottle.id}
                                             onClick={() => navigate(`/app?bottle=${bottle.id}`)}
                                             className="flex flex-col items-center group"
                                         >
+                                            {/* 뚜껑 */}
+                                            <div className="w-[80%] h-2 bg-gray-200 rounded-lg" />
                                             {/* 유리병 카드 */}
-                                            <div className="w-full aspect-3/4 bg-gray-50 rounded-2xl border border-gray-100 flex flex-col items-center justify-end relative overflow-hidden transition-all group-hover:shadow-md group-hover:bg-gray-100/80 group-hover:-translate-y-1">
+                                            <div className="w-full aspect-3/4 bg-gray-50 rounded-b-2xl rounded-t-xl border border-gray-100 flex flex-col items-center justify-end relative overflow-hidden">
                                                 {/* 구슬들 - 좌표 기반 배치 */}
                                                 {bottle.marbles.length > 0 ? (
                                                     bottle.marbles.some(m => m.position_x != null) ? (
@@ -159,9 +157,13 @@ export default function CollectionPage() {
                                             </span>
                                         </button>
                                     ))}
-                                    {/* 빈 칸 채우기 (3열 유지) */}
+                                    {/* 빈 칸 채우기 (3열 유지, 높이 일정) */}
                                     {Array.from({ length: 3 - row.length }).map((_, i) => (
-                                        <div key={`empty-${i}`} className="w-full" />
+                                        <div key={`empty-${i}`} className="flex flex-col items-center">
+                                            <div className="w-full aspect-3/4" />
+                                            <span className="mt-2 text-xs">&nbsp;</span>
+                                            <span className="text-[10px]">&nbsp;</span>
+                                        </div>
                                     ))}
                                 </div>
 
@@ -174,37 +176,26 @@ export default function CollectionPage() {
                         ))}
                     </div>
 
-                    {/* 페이지네이션 */}
-                    {totalPages > 1 && (
-                        <div className="flex items-center justify-center gap-2 mt-8">
-                            <button
-                                onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
-                                disabled={currentPage === 1}
-                                className="p-2 rounded-full hover:bg-gray-100 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
-                            >
-                                <ChevronLeft className="w-5 h-5 text-gray-600" />
-                            </button>
-                            {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
-                                <button
-                                    key={page}
-                                    onClick={() => setCurrentPage(page)}
-                                    className={`w-9 h-9 rounded-full text-sm font-medium transition-colors ${currentPage === page
-                                        ? "bg-gray-900 text-white"
-                                        : "text-gray-500 hover:bg-gray-100"
-                                        }`}
-                                >
-                                    {page}
-                                </button>
-                            ))}
-                            <button
-                                onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
-                                disabled={currentPage === totalPages}
-                                className="p-2 rounded-full hover:bg-gray-100 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
-                            >
-                                <ChevronRight className="w-5 h-5 text-gray-600" />
-                            </button>
-                        </div>
-                    )}
+                    {/* 페이지네이션 - 1 / 3 형식 */}
+                    <div className="flex items-center justify-center gap-4 mt-8">
+                        <button
+                            onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+                            disabled={currentPage === 1}
+                            className="p-2 rounded-full hover:bg-gray-100 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                        >
+                            <ChevronLeft className="w-5 h-5 text-gray-600" />
+                        </button>
+                        <span className="text-sm font-medium text-gray-700">
+                            {currentPage} / {Math.max(1, Math.ceil(bottles.length / 9))}
+                        </span>
+                        <button
+                            onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+                            disabled={currentPage === totalPages}
+                            className="p-2 rounded-full hover:bg-gray-100 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                        >
+                            <ChevronRight className="w-5 h-5 text-gray-600" />
+                        </button>
+                    </div>
                 </>
             )}
         </div>
