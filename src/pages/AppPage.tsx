@@ -365,7 +365,7 @@ export default function AppPage() {
               </Button>
             </div>
 
-            <div className="flex gap-2 mb-6 bg-gray-50 p-2 rounded-xl">
+            <div className="flex gap-2 mb-4 bg-gray-50 p-2 rounded-xl">
               <input
                 type="text"
                 className="flex-1 px-3 py-2 bg-white rounded-lg border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -382,7 +382,6 @@ export default function AppPage() {
             <div className="grid grid-cols-2 gap-3 mb-6 overflow-y-auto pr-1">
               {quickActions.length === 0 ? (
                 <div className="col-span-2 flex flex-col items-center justify-center text-gray-400">
-                  <Star className="w-8 h-8 mb-2 text-gray-300" />
                   <p className="text-sm">자주 하는 일을 등록해보세요</p>
                 </div>
               ) : (
@@ -407,7 +406,7 @@ export default function AppPage() {
                         ) : (
                           <button
                             onClick={(e) => deleteQuickAction(action.id, e)}
-                            className="p-1 hover:bg-red-100 rounded-lg transition-colors"
+                            className="p-1 rounded-lg transition-colors"
                           >
                             <Trash2 className="text-gray-300" />
                           </button>
