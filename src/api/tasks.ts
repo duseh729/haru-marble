@@ -278,3 +278,47 @@ export const marblesApi = {
     if (error) throw error;
   }
 };
+
+// ---------------------------------------------
+// ⚡ Frequent Tasks API (자주 하는 일)
+// ---------------------------------------------
+export interface FrequentTask {
+  id: number;
+  content: string;
+  created_at: string;
+}
+
+export const frequentTasksApi = {
+  // 전체 목록 가져오기
+  getAll: async () => {
+    const { data, error } = await supabase
+      .from("frequent_tasks")
+      .select("*")
+      .order("created_at", { ascending: true });
+
+    if (error) throw error;
+    return data as FrequentTask[];
+  },
+
+  // 새로 추가
+  create: async (content: string) => {
+    const { data, error } = await supabase
+      .from("frequent_tasks")
+      .insert([{ content }])
+      .select()
+      .single();
+
+    if (error) throw error;
+    return data as FrequentTask;
+  },
+
+  // 삭제
+  delete: async (id: number) => {
+    const { error } = await supabase
+      .from("frequent_tasks")
+      .delete()
+      .eq("id", id);
+
+    if (error) throw error;
+  },
+};

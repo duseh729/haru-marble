@@ -2,10 +2,10 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import { Helmet } from "react-helmet-async";
 import PhysicsJar from "../components/PhysicsJar";
 import { Button } from "@/components/ui/button";
-import { Plus, X, Zap, Check, Trash2, History, CalendarDays, Pencil } from "lucide-react";
+import { Plus, X, Star, Check, Trash2, CheckCheck, CalendarDays, Pencil } from "lucide-react";
 import { MARBLE_COLORS } from "../utils/MarbleFactory";
 
-import { tasksApi, bottlesApi } from "../api/tasks";
+import { tasksApi, bottlesApi, frequentTasksApi } from "../api/tasks";
 import type { Bottle } from "../api/tasks";
 import { Link } from "react-router-dom";
 
@@ -22,44 +22,9 @@ interface Task {
 
 // ... (QuickAction 관련 인터페이스 유지) ...
 interface QuickActionItem {
-  id: string;
+  id: number;
   text: string;
 }
-
-// ... (DEFAULT_QUICK_ACTIONS 유지) ...
-const DEFAULT_QUICK_ACTIONS: QuickActionItem[] = [
-  { id: '1', text: "물 마시기" },
-  { id: '2', text: "운동하기" },
-  { id: '3', text: "책 읽기" },
-  { id: '4', text: "영양제" },
-];
-
-// ... (Icons 유지) ...
-const Icons = {
-  // ... 생략 ...
-  Trophy: () => (
-    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-yellow-500">
-      <path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6" />
-      <path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18" />
-      <path d="M4 22h16" />
-      <path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22" />
-      <path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22" />
-      <path d="M18 2H6v7a6 6 0 0 0 12 0V2Z" />
-    </svg>
-  ),
-  Send: () => (
-    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <path d="m22 2-7 20-4-9-9-4Z" />
-      <path d="M22 2 11 13" />
-    </svg>
-  ),
-  CheckCircle: () => (
-    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-green-500 fill-green-100">
-      <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
-      <path d="m9 11 3 3L22 4" />
-    </svg>
-  ),
-};
 
 export default function AppPage() {
   const [tasks, setTasks] = useState<Task[]>([]);
@@ -144,18 +109,16 @@ export default function AppPage() {
   const [scrollToTaskId, setScrollToTaskId] = useState<number | null>(null);
 
   // 퀵 액션 관련 상태
-  const [selectedActionIds, setSelectedActionIds] = useState<string[]>([]);
-  const [quickActions, setQuickActions] = useState<QuickActionItem[]>(() => {
-    const saved = localStorage.getItem('myQuickActions');
-    return saved ? JSON.parse(saved) : DEFAULT_QUICK_ACTIONS;
-  });
-
+  const [selectedActionIds, setSelectedActionIds] = useState<number[]>([]);
+  const [quickActions, setQuickActions] = useState<QuickActionItem[]>([]);
   const [newActionText, setNewActionText] = useState("");
-  const [newActionEmoji, setNewActionEmoji] = useState("✨");
 
+  // DB에서 자주 하는 일 불러오기
   useEffect(() => {
-    localStorage.setItem('myQuickActions', JSON.stringify(quickActions));
-  }, [quickActions]);
+    frequentTasksApi.getAll().then((data) => {
+      setQuickActions(data.map(d => ({ id: d.id, text: d.content })));
+    }).catch(console.error);
+  }, []);
 
   const getFormattedTime = (dateString?: string) => {
     const date = dateString ? new Date(dateString) : new Date();
@@ -184,26 +147,29 @@ export default function AppPage() {
   };
 
   // --- 퀵 액션 로직 ---
-  const createQuickAction = () => {
+  const createQuickAction = async () => {
     if (!newActionText.trim()) return;
-    const newAction: QuickActionItem = {
-      id: Date.now().toString(),
-      emoji: newActionEmoji || "⚡",
-      text: newActionText.trim(),
-    };
-    setQuickActions([...quickActions, newAction]);
-    setNewActionText("");
-    setNewActionEmoji("✨");
+    try {
+      const created = await frequentTasksApi.create(newActionText.trim());
+      setQuickActions(prev => [...prev, { id: created.id, text: created.content }]);
+      setNewActionText("");
+    } catch (error) {
+      console.error("자주 하는 일 추가 실패:", error);
+    }
   };
 
-  const deleteQuickAction = (id: string, e: React.MouseEvent) => {
+  const deleteQuickAction = async (id: number, e: React.MouseEvent) => {
     e.stopPropagation();
-    const filtered = quickActions.filter(action => action.id !== id);
-    setQuickActions(filtered);
-    setSelectedActionIds(prev => prev.filter(selectedId => selectedId !== id));
+    try {
+      await frequentTasksApi.delete(id);
+      setQuickActions(prev => prev.filter(action => action.id !== id));
+      setSelectedActionIds(prev => prev.filter(selectedId => selectedId !== id));
+    } catch (error) {
+      console.error("자주 하는 일 삭제 실패:", error);
+    }
   };
 
-  const toggleSelection = (id: string) => {
+  const toggleSelection = (id: number) => {
     if (selectedActionIds.includes(id)) {
       setSelectedActionIds(prev => prev.filter(itemId => itemId !== id));
     } else {
@@ -289,7 +255,9 @@ export default function AppPage() {
             </div>
             <Link to="/collection" className="inline-block">
               <div className="flex items-center space-x-2 bg-white rounded-xl px-4 py-2 shadow-sm hover:bg-gray-50 transition-colors">
-                <Icons.Trophy />
+                <div className="w-4 h-4 flex items-center" >
+                  <img src="/bottleIcon.png" alt="유리병" />
+                </div>
                 <span className="font-bold text-gray-800">내 유리병</span>
               </div>
             </Link>
@@ -303,7 +271,7 @@ export default function AppPage() {
               className="flex-1 flex items-center justify-center h-12 rounded-xl border-2 hover:border-solid hover:bg-gray-50"
               onClick={() => setIsQuickActionModalOpen(true)}
             >
-              <Zap className="w-4 h-4 text-yellow-500" />
+              <Star className="w-4 h-4 text-yellow-400" />
               <span className="text-gray-600">자주 하는 일</span>
             </Button>
 
@@ -314,7 +282,7 @@ export default function AppPage() {
               onClick={() => setIsHistoryModalOpen(true)}
               title="오늘의 기록 보기"
             >
-              <History className="w-5 h-5 text-gray-500" />
+              <CheckCheck className="w-5 h-5 text-green-400" />
               <span className="text-gray-600">완료한 일</span>
             </Button>
           </div>
@@ -412,31 +380,43 @@ export default function AppPage() {
             </div>
 
             <div className="grid grid-cols-2 gap-3 mb-6 overflow-y-auto pr-1">
-              {quickActions.map((action) => {
-                const isSelected = selectedActionIds.includes(action.id);
-                return (
-                  <Button
-                    // ... 생략 (key, onClick 등)
-                    key={action.id}
-                    onClick={() => toggleSelection(action.id)}
-                    className={`flex items-center justify-between p-6 transition-colors ${isSelected
-                      ? "bg-blue-600 hover:bg-blue-700 text-white border-blue-600 border-1" // 선택 시: 파란 배경 + 흰색 글자
-                      : "bg-white hover:bg-gray-50 text-gray-900 border-gray-200 border-1"  // 미선택 시: 흰색 배경 + 회색 글자
-                      }`}
-                  >
-                    <span className="truncate">{action.text}</span>
+              {quickActions.length === 0 ? (
+                <div className="col-span-2 flex flex-col items-center justify-center text-gray-400">
+                  <Star className="w-8 h-8 mb-2 text-gray-300" />
+                  <p className="text-sm">자주 하는 일을 등록해보세요</p>
+                </div>
+              ) : (
+                quickActions.map((action) => {
+                  const isSelected = selectedActionIds.includes(action.id);
+                  return (
+                    <Button
+                      // ... 생략 (key, onClick 등)
+                      key={action.id}
+                      onClick={() => toggleSelection(action.id)}
+                      className={`flex items-center justify-between p-6 transition-colors ${isSelected
+                        ? "bg-blue-600 hover:bg-blue-700 text-white border-blue-600 border-1" // 선택 시: 파란 배경 + 흰색 글자
+                        : "bg-white hover:bg-gray-50 text-gray-900 border-gray-200 border-1"  // 미선택 시: 흰색 배경 + 회색 글자
+                        }`}
+                    >
+                      <span className="truncate">{action.text}</span>
 
-                    {/* 우측 아이콘 제어 로직 */}
-                    <div className="flex items-center">
-                      {isSelected ? (
-                        <Check className="text-white" /> // 선택 시 체크 (흰색)
-                      ) : (
-                        <Trash2 className="text-gray-300" /> // 미선택 시 휴지통 (회색)
-                      )}
-                    </div>
-                  </Button>
-                );
-              })}
+                      {/* 우측 아이콘 제어 로직 */}
+                      <div className="flex items-center">
+                        {isSelected ? (
+                          <Check className="text-white" /> // 선택 시 체크 (흰색)
+                        ) : (
+                          <button
+                            onClick={(e) => deleteQuickAction(action.id, e)}
+                            className="p-1 hover:bg-red-100 rounded-lg transition-colors"
+                          >
+                            <Trash2 className="text-gray-300" />
+                          </button>
+                        )}
+                      </div>
+                    </Button>
+                  );
+                })
+              )}
             </div>
 
             <Button
