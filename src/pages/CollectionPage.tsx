@@ -112,7 +112,8 @@ export default function CollectionPage() {
                                                                     key={marble.id}
                                                                     className="rounded-full shadow-sm absolute"
                                                                     style={{
-                                                                        backgroundColor: marble.color || "#9CA3AF",
+                                                                        background: `radial-gradient(circle at 35% 35%, rgba(255,255,255,0.7) 0%, rgba(255,255,255,0.2) 20%, ${marble.color || '#9CA3AF'} 20%, ${marble.color || '#9CA3AF'} 100%)`,
+                                                                        border: '1px solid rgba(255,255,255,0.4)',
                                                                         width: `${scaledSize}px`,
                                                                         height: `${scaledSize}px`,
                                                                         left: `${((marble.position_x ?? 150) / 300) * 100}%`,
@@ -130,7 +131,8 @@ export default function CollectionPage() {
                                                                     key={marble.id}
                                                                     className="rounded-full shadow-sm"
                                                                     style={{
-                                                                        backgroundColor: marble.color || "#9CA3AF",
+                                                                        background: `radial-gradient(circle at 30% 30%, rgba(255,255,255,0.7) 0%, rgba(255,255,255,0.2) 20%, ${marble.color || '#9CA3AF'} 45%, ${marble.color || '#9CA3AF'} 100%)`,
+                                                                        border: '1px solid rgba(255,255,255,0.4)',
                                                                         width: bottle.marbles.length > 12 ? "10px" : bottle.marbles.length > 6 ? "12px" : "16px",
                                                                         height: bottle.marbles.length > 12 ? "10px" : bottle.marbles.length > 6 ? "12px" : "16px",
                                                                     }}
