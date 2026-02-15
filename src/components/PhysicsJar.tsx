@@ -78,7 +78,11 @@ export default function PhysicsJar({ marbles, onPositionsSettled, onMarbleClick 
 
     const { Engine, Render, World, Bodies, Runner, Events, Query } = Matter;
 
-    const engine = Engine.create({ enableSleeping: true });
+    const engine = Engine.create({
+      enableSleeping: true,
+      positionIterations: 16,
+      velocityIterations: 10,
+    });
     engineRef.current = engine;
 
     const width = sceneRef.current.clientWidth;
@@ -210,8 +214,8 @@ export default function PhysicsJar({ marbles, onPositionsSettled, onMarbleClick 
 
     newMarbles.forEach((task, i) => {
       const color = task.color || MarbleFactory.getRandomColor();
-      const x = task.position_x ?? (150 + (Math.random() - 0.5) * 50);
-      const y = task.position_y ?? (-50 - i * 30);
+      const x = 150 + (Math.random() - 0.5) * 100;
+      const y = -50 - i * 30;
 
       const marble = MarbleFactory.createWithColor(x, y, 22, color);
       Matter.World.add(engineRef.current!.world, marble);
