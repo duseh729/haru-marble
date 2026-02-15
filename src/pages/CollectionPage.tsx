@@ -56,7 +56,7 @@ export default function CollectionPage() {
     };
 
     return (
-        <div className="w-full max-w-md mx-auto px-4 py-6 min-h-screen">
+        <div className="w-full max-w-md mx-auto px-4 min-h-screen">
             <Helmet>
                 <title>내 컬렉션 - Done List</title>
             </Helmet>

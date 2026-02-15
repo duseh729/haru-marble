@@ -105,7 +105,8 @@ export default function AppPage() {
 
   // --- 모달 상태 관리 ---
   const [isQuickActionModalOpen, setIsQuickActionModalOpen] = useState(false);
-  const [isHistoryModalOpen, setIsHistoryModalOpen] = useState(false); // ✨ 기록 모달 상태 추가
+  const [isHistoryModalOpen, setIsHistoryModalOpen] = useState(false);
+  const [isBottleFullModalOpen, setIsBottleFullModalOpen] = useState(false);
   const [scrollToTaskId, setScrollToTaskId] = useState<number | null>(null);
 
   // 퀵 액션 관련 상태
@@ -133,6 +134,11 @@ export default function AppPage() {
   const addTask = async (text: string) => {
     const taskText = text.trim();
     if (!taskText || !currentBottle) return;
+
+    if (tasks.length >= 60) {
+      setIsBottleFullModalOpen(true);
+      return;
+    }
 
     try {
       // 현재 선택된 bottle의 ID와 색상 전달
@@ -347,6 +353,37 @@ export default function AppPage() {
             </div>
           </div>
           <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[320px] h-[420px] bg-blue-100/50 rounded-full blur-3xl -z-10"></div>
+
+          {/* --- 프로그레스 바 --- */}
+          {(() => {
+            const MAX_MARBLES = 60;
+            const count = tasks.length;
+            const progress = Math.min(count / MAX_MARBLES, 1);
+            const message =
+              count >= MAX_MARBLES ? "반짝이는 성취로 가득 찬 특별한 병이에요!" :
+                count >= 51 ? "마지막 스퍼트! 병이 곧 가득 찰 것 같아요." :
+                  count >= 31 ? "유리병이 제법 묵직해졌네요!" :
+                    count >= 11 ? "구슬들이 조금씩 모여 북적거리고 있어요!" :
+                      "첫 번째 구슬의 설렘! 차근차근 담아봐요.";
+
+            return (
+              <div className="w-[300px] mt-4 z-10 bg-gray-50 rounded-xl p-4">
+                <div className="flex justify-between items-center mb-1.5">
+                  <span className="text-xs font-medium text-gray-500">{count} / {MAX_MARBLES}</span>
+                </div>
+                <div className="w-full h-4 bg-gray-200 rounded-full overflow-hidden">
+                  <div
+                    className="h-full rounded-full transition-all duration-500 ease-out"
+                    style={{
+                      width: `${progress * 100}%`,
+                      background: "linear-gradient(90deg, #93c5fd, #3b82f6)",
+                    }}
+                  />
+                </div>
+                <p className="text-xs text-gray-400 mt-2 text-center">{message}</p>
+              </div>
+            );
+          })()}
         </main>
 
       </div>
@@ -556,6 +593,26 @@ export default function AppPage() {
                 삭제
               </Button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* --- 모달: 유리병 가득 참 알림 --- */}
+      {isBottleFullModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4 animate-in fade-in duration-200">
+          <div
+            className="bg-white w-full max-w-[280px] rounded-3xl p-6 shadow-2xl animate-in zoom-in-95 duration-200 text-center"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="text-5xl mb-3">✨</div>
+            <h3 className="text-lg font-bold text-gray-900 mb-2">유리병이 가득 찼어요!</h3>
+            <p className="text-sm text-gray-500 mb-5">새 유리병을 만들어 더 많은 성취를 담아보세요.</p>
+            <Button
+              className="w-full h-11 rounded-xl font-medium bg-blue-500 hover:bg-blue-600 text-white"
+              onClick={() => setIsBottleFullModalOpen(false)}
+            >
+              확인
+            </Button>
           </div>
         </div>
       )}
