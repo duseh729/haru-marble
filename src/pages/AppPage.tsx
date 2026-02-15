@@ -4,6 +4,7 @@ import PhysicsJar from "../components/PhysicsJar";
 import { Button } from "@/components/ui/button";
 import { Plus, X, Star, Check, Trash2, CheckCheck, CalendarDays, Pencil } from "lucide-react";
 import { MARBLE_COLORS } from "../utils/MarbleFactory";
+import ColorPalette from "../components/ColorPickerDropdown";
 
 import { tasksApi, bottlesApi, frequentTasksApi } from "../api/tasks";
 import type { Bottle } from "../api/tasks";
@@ -30,9 +31,9 @@ export default function AppPage() {
   const [tasks, setTasks] = useState<Task[]>([]);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(true);
-  const [selectedColor, setSelectedColor] = useState<string>(MARBLE_COLORS[0]); // 선택된 구슬 색상
-  const [showColorPicker, setShowColorPicker] = useState(false); // 색상 피커 표시 여부
-  const colorPickerRef = useRef<HTMLDivElement>(null); // 색상 피커 ref
+  const [selectedColor, setSelectedColor] = useState<string>(MARBLE_COLORS[0]);
+  const [showColorPicker, setShowColorPicker] = useState(false);
+  const colorPickerRef = useRef<HTMLDivElement>(null);
 
   // 색상 피커 외부 클릭 시 닫기
   useEffect(() => {
@@ -41,14 +42,8 @@ export default function AppPage() {
         setShowColorPicker(false);
       }
     };
-
-    if (showColorPicker) {
-      document.addEventListener('mousedown', handleClickOutside);
-    }
-
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-    };
+    if (showColorPicker) document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
   }, [showColorPicker]);
 
   // 현재 선택된 Bottle 상태
@@ -191,7 +186,7 @@ export default function AppPage() {
   };
 
   // --- 구슬 수정/삭제 로직 ---
-  const [editingTask, setEditingTask] = useState<{ id: number; text: string } | null>(null);
+  const [editingTask, setEditingTask] = useState<{ id: number; text: string; color: string } | null>(null);
   const [deleteTargetId, setDeleteTargetId] = useState<number | null>(null);
 
   const handleDeleteTask = (taskId: number) => {
@@ -210,16 +205,18 @@ export default function AppPage() {
     }
   };
 
-  const handleUpdateTask = async (taskId: number, newText: string) => {
+  const handleUpdateTask = async (taskId: number, newText: string, newColor?: string) => {
     if (!newText.trim()) return;
     const originalTask = tasks.find(t => t.id === taskId);
-    if (originalTask && originalTask.text === newText.trim()) {
+    if (originalTask && originalTask.text === newText.trim() && (!newColor || originalTask.color === newColor)) {
       setEditingTask(null);
       return;
     }
     try {
-      const updated = await tasksApi.updateTask(taskId, { text: newText.trim() });
-      setTasks(prev => prev.map(t => t.id === taskId ? { ...t, text: updated.text, createdAt: updated.createdAt } : t));
+      const updates: { text?: string; color?: string } = { text: newText.trim() };
+      if (newColor) updates.color = newColor;
+      const updated = await tasksApi.updateTask(taskId, updates);
+      setTasks(prev => prev.map(t => t.id === taskId ? { ...t, text: updated.text, color: updated.color, createdAt: updated.createdAt } : t));
       setEditingTask(null);
     } catch (error) {
       console.error("Failed to update task:", error);
@@ -323,22 +320,11 @@ export default function AppPage() {
 
             {/* 색상 피커 드롭다운 */}
             {showColorPicker && (
-              <div className="absolute left-0 right-0 mt-2 bg-white rounded-xl p-3 shadow-lg border border-gray-100 z-30 animate-in fade-in slide-in-from-top-2 duration-200">
-                <div className="flex flex-wrap gap-2 justify-center">
-                  {MARBLE_COLORS.map((color) => (
-                    <button
-                      key={color}
-                      onClick={() => {
-                        setSelectedColor(color);
-                        setShowColorPicker(false);
-                      }}
-                      className={`w-8 h-8 rounded-full transition-transform hover:scale-125 ${selectedColor === color ? 'ring-2 ring-blue-500 ring-offset-2' : ''
-                        }`}
-                      style={{ backgroundColor: color }}
-                      title={color}
-                    />
-                  ))}
-                </div>
+              <div className="absolute left-0 right-0 mt-2 z-50">
+                <ColorPalette
+                  selectedColor={selectedColor}
+                  onSelect={(color) => { setSelectedColor(color); setShowColorPicker(false); }}
+                />
               </div>
             )}
           </div>
@@ -509,10 +495,34 @@ export default function AppPage() {
                       } : undefined}
                     >
                       {/* 구슬 색상 원 */}
-                      <div
-                        className="shrink-0 w-8 h-8 rounded-full shadow-sm border-2 border-white mt-0.5"
-                        style={{ backgroundColor: task.color || '#9CA3AF' }}
-                      />
+                      {editingTask?.id === task.id ? (
+                        <div className="relative shrink-0 mt-0.5">
+                          <button
+                            className="w-8 h-8 rounded-full shadow-sm border-2 border-blue-400 ring-2 ring-blue-200 transition-colors"
+                            style={{ backgroundColor: editingTask.color || '#9CA3AF' }}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              const picker = e.currentTarget.nextElementSibling as HTMLElement;
+                              picker.classList.toggle('hidden');
+                            }}
+                            title="색상 변경"
+                          />
+                          <div className="hidden absolute top-10 left-0 z-50 w-[200px]">
+                            <ColorPalette
+                              selectedColor={editingTask.color || MARBLE_COLORS[0]}
+                              onSelect={(color) => {
+                                setEditingTask({ ...editingTask, color });
+                                document.querySelectorAll('.hidden.absolute.top-10').forEach(el => el.classList.add('hidden'));
+                              }}
+                            />
+                          </div>
+                        </div>
+                      ) : (
+                        <div
+                          className="shrink-0 w-8 h-8 rounded-full shadow-sm border-2 border-white mt-0.5"
+                          style={{ backgroundColor: task.color || '#9CA3AF' }}
+                        />
+                      )}
                       <div className="flex-1 min-w-0">
                         {editingTask?.id === task.id ? (
                           <div className="flex items-center gap-2">
@@ -521,13 +531,13 @@ export default function AppPage() {
                               value={editingTask.text}
                               onChange={(e) => setEditingTask({ ...editingTask, text: e.target.value })}
                               onKeyDown={(e) => {
-                                if (e.key === 'Enter') handleUpdateTask(task.id, editingTask.text);
+                                if (e.key === 'Enter') handleUpdateTask(task.id, editingTask.text, editingTask.color);
                                 if (e.key === 'Escape') setEditingTask(null);
                               }}
                               className="flex-1 min-w-0 px-2 py-1 text-sm border border-blue-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                               autoFocus
                             />
-                            <button onClick={() => handleUpdateTask(task.id, editingTask.text)} className="text-blue-500 hover:text-blue-700">
+                            <button onClick={() => handleUpdateTask(task.id, editingTask.text, editingTask.color)} className="text-blue-500 hover:text-blue-700">
                               <Check className="w-4 h-4" />
                             </button>
                             <button onClick={() => setEditingTask(null)} className="text-gray-400 hover:text-gray-600">
@@ -538,7 +548,7 @@ export default function AppPage() {
                           <div className="flex items-center gap-1">
                             <span className="font-medium text-gray-800 truncate">{task.text}</span>
                             <button
-                              onClick={() => setEditingTask({ id: task.id, text: task.text })}
+                              onClick={() => setEditingTask({ id: task.id, text: task.text, color: task.color || MARBLE_COLORS[0] })}
                               className="shrink-0 p-1 text-gray-400 hover:text-blue-500 hover:bg-blue-50 rounded-lg transition-colors"
                               title="수정"
                             >
