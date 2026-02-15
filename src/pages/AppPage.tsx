@@ -240,12 +240,12 @@ export default function AppPage() {
   }, []);
 
   return (
-    <div className="w-full flex justify-center">
+    <div className="w-full min-h-dvh flex flex-col">
       <Helmet>
         <title>내 유리병 - Done List</title>
       </Helmet>
 
-      <div>
+      <div className="px-5 flex-1 flex flex-col">
         {/* --- 상단 헤더 --- */}
         <header className="mb-6">
           <div className="flex justify-between items-center mb-2">
@@ -339,7 +339,7 @@ export default function AppPage() {
         </header>
 
         {/* --- 메인 유리병 --- */}
-        <main className="flex-1 flex flex-col justify-center items-center mb-8 relative">
+        <main className="flex-1 flex flex-col items-center mb-8 relative">
           <div className="w-[260px] h-8 bg-gray-200 from-gray-200/50 to-transparent rounded-xl z-20"></div>
           <div className="rounded-b-[2rem] rounded-t-[50px] relative w-[300px] h-[400px] bg-white border-4 border-gray-200 shadow-lg overflow-hidden z-10">
             <div className="absolute inset-0 flex justify-center items-end px-1">
