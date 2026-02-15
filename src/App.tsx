@@ -18,29 +18,31 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
 function App() {
   return (
     <BrowserRouter>
-      <MobileLayout>
-        <Routes>
-          <Route path="/" element={<LandingPage />} />
-          <Route path="/login" element={<LoginPage />} />
-          <Route path="/register" element={<RegisterPage />} />
-          <Route
-            path="/app"
-            element={
+      <Routes>
+        <Route path="/" element={<LandingPage />} />
+        <Route path="/login" element={<MobileLayout><LoginPage /></MobileLayout>} />
+        <Route path="/register" element={<MobileLayout><RegisterPage /></MobileLayout>} />
+        <Route
+          path="/app"
+          element={
+            <MobileLayout>
               <ProtectedRoute>
                 <AppPage />
               </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/collection"
-            element={
+            </MobileLayout>
+          }
+        />
+        <Route
+          path="/collection"
+          element={
+            <MobileLayout>
               <ProtectedRoute>
                 <CollectionPage />
               </ProtectedRoute>
-            }
-          />
-        </Routes>
-      </MobileLayout>
+            </MobileLayout>
+          }
+        />
+      </Routes>
     </BrowserRouter>
   );
 }
