@@ -257,12 +257,14 @@ export default function AppPage() {
               <p className="text-gray-600">오늘의 성취를 담다</p>
             </div>
             <Link to="/collection" className="inline-block">
-              <div className="flex items-center space-x-2 bg-white rounded-xl px-4 py-2 shadow-sm hover:bg-gray-50 transition-colors">
+              <Button
+                variant="outline"
+                className="flex-1 h-12 rounded-xl border-2 hover:bg-gray-50 flex items-center justify-center">
                 <div className="w-4 h-4 flex items-center" >
                   <img src="/bottleIcon.png" alt="유리병" />
                 </div>
                 <span className="font-bold text-gray-800">내 유리병</span>
-              </div>
+              </Button>
             </Link>
           </div>
 
@@ -333,7 +335,7 @@ export default function AppPage() {
         {/* --- 메인 유리병 --- */}
         <main className="flex-1 flex flex-col items-center mb-8 relative">
           <div className="w-[260px] h-8 bg-gray-200 from-gray-200/50 to-transparent rounded-xl z-20"></div>
-          <div className="rounded-b-[2rem] rounded-t-[50px] relative w-[300px] h-[400px] bg-white border-4 border-gray-200 shadow-lg overflow-hidden z-10">
+          <div className="rounded-b-[2rem] rounded-t-[50px] relative w-[320px] h-[400px] bg-white border-4 border-gray-200 shadow-lg overflow-hidden z-10">
             <div className="absolute inset-0 flex justify-center items-end px-1">
               <PhysicsJar marbles={tasks} onPositionsSettled={handlePositionsSettled} onMarbleClick={handleMarbleClick} />
             </div>
@@ -353,7 +355,7 @@ export default function AppPage() {
                       "첫 번째 구슬의 설렘! 차근차근 담아봐요.";
 
             return (
-              <div className="w-[300px] mt-4 z-10 bg-gray-50 rounded-xl p-4">
+              <div className="w-[320px] mt-4 z-10 bg-gray-100 rounded-xl p-4">
                 <div className="flex justify-between items-center mb-1.5">
                   <span className="text-xs font-medium text-gray-500">{count} / {MAX_MARBLES}</span>
                 </div>

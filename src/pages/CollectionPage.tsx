@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { Helmet } from "react-helmet-async";
 import { useNavigate } from "react-router-dom";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { ChevronLeft, ChevronRight, Plus, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { bottlesApi } from "../api/tasks";
 import type { Bottle, Marble } from "../api/tasks";
@@ -15,6 +15,8 @@ export default function CollectionPage() {
     const [bottles, setBottles] = useState<BottleWithMarbles[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [currentPage, setCurrentPage] = useState(1);
+    const [showCreateModal, setShowCreateModal] = useState(false);
+    const [newBottleTitle, setNewBottleTitle] = useState("");
 
     useEffect(() => {
         loadBottles();
@@ -55,21 +57,42 @@ export default function CollectionPage() {
         return `${year}.${month}.${day}`;
     };
 
+    const handleCreateBottle = async () => {
+        const title = newBottleTitle.trim();
+        if (!title) return;
+        try {
+            const newBottle = await bottlesApi.createBottle(title);
+            setNewBottleTitle("");
+            setShowCreateModal(false);
+            navigate(`/app?bottle=${newBottle.id}`);
+        } catch (error) {
+            console.error("유리병 생성 실패:", error);
+            alert("유리병 생성에 실패했습니다.");
+        }
+    };
+
     return (
         <div className="w-full max-w-md mx-auto px-4 min-h-screen">
             <Helmet>
                 <title>내 컬렉션 - Done List</title>
             </Helmet>
 
-            {/* 돌아가기 버튼 */}
-            <div className="mb-4">
+            {/* 헤더 */}
+            <div className="mb-4 flex items-center justify-between">
                 <Button
                     variant="outline"
-                    className="rounded-full px-4 h-10 border-2 hover:bg-gray-50"
+                    className="rounded-xl px-4 h-10 border-2 hover:bg-gray-50"
                     onClick={() => navigate("/app")}
                 >
                     <ChevronLeft className="w-4 h-4 mr-1" />
                     <span className="text-gray-700 font-medium">돌아가기</span>
+                </Button>
+                <Button
+                    className="rounded-xl px-4 h-10 bg-blue-500 hover:bg-blue-600 text-white"
+                    onClick={() => setShowCreateModal(true)}
+                >
+                    <Plus className="w-4 h-4 mr-1" />
+                    <span className="font-medium">새 유리병</span>
                 </Button>
             </div>
 
@@ -199,6 +222,35 @@ export default function CollectionPage() {
                         </button>
                     </div>
                 </>
+            )}
+            {/* 새 유리병 생성 모달 */}
+            {showCreateModal && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
+                    <div className="bg-white w-full max-w-[300px] rounded-3xl p-6 shadow-2xl">
+                        <div className="flex items-center justify-between mb-4">
+                            <h3 className="text-lg font-bold text-gray-900">새 유리병 만들기</h3>
+                            <button onClick={() => { setShowCreateModal(false); setNewBottleTitle(""); }} className="p-1 text-gray-400 hover:text-gray-600">
+                                <X className="w-5 h-5" />
+                            </button>
+                        </div>
+                        <input
+                            type="text"
+                            value={newBottleTitle}
+                            onChange={(e) => setNewBottleTitle(e.target.value)}
+                            onKeyDown={(e) => e.key === 'Enter' && !e.nativeEvent.isComposing && handleCreateBottle()}
+                            placeholder="유리병 이름을 입력하세요"
+                            className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm mb-4"
+                            autoFocus
+                        />
+                        <Button
+                            className="w-full h-11 rounded-xl font-medium bg-blue-500 hover:bg-blue-600 text-white"
+                            onClick={handleCreateBottle}
+                            disabled={!newBottleTitle.trim()}
+                        >
+                            만들기
+                        </Button>
+                    </div>
+                </div>
             )}
         </div>
     );
