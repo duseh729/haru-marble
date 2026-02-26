@@ -242,7 +242,11 @@ export default function PhysicsJar({ marbles, onPositionsSettled, onMarbleClick 
     const isLeft = tooltip.x < threshold;
     const isRight = tooltip.x > containerWidth - threshold;
 
-    // 2. 가변 스타일 값 계산
+    // 2. 상단 판정: 구슬이 위쪽에 있으면 툴팁을 아래로 표시
+    const topThreshold = 25;
+    const isTop = tooltip.y < topThreshold;
+
+    // 3. 가변 스타일 값 계산
     // 왼쪽이면 10px 고정, 오른쪽이면 끝-10px 고정, 아니면 구슬 위치
     const leftPos = isLeft ? padding : isRight ? containerWidth - padding : tooltip.x;
 
@@ -251,13 +255,17 @@ export default function PhysicsJar({ marbles, onPositionsSettled, onMarbleClick 
 
     const textAlign = isLeft ? "left" : isRight ? "right" : "center";
 
+    // 상단이면 구슬 아래에, 아니면 구슬 위에 표시
+    const topPos = isTop ? tooltip.y + 35 : tooltip.y + 15;
+    const translateY = isTop ? "0%" : "-100%";
+
     return (
       <div
         style={{
           position: "absolute",
           left: leftPos,
-          top: tooltip.y + 15,
-          transform: `translate(${translateX}, -100%)`,
+          top: topPos,
+          transform: `translate(${translateX}, ${translateY})`,
           backgroundColor: "rgba(0, 0, 0, 0.8)",
           color: "white",
           padding: "8px 12px",
@@ -307,7 +315,7 @@ export default function PhysicsJar({ marbles, onPositionsSettled, onMarbleClick 
         display: "flex",
         justifyContent: "center",
         position: "relative",
-        overflow: "hidden"
+        overflow: "visible"
       }}
     >
       {renderTooltip()}
