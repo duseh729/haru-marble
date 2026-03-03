@@ -2,7 +2,7 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import { Helmet } from "react-helmet-async";
 import PhysicsJar from "../components/PhysicsJar";
 import { Button } from "@/components/ui/button";
-import { Plus, X, Star, Check, Trash2, CheckCheck, CalendarDays, Pencil } from "lucide-react";
+import { Plus, X, Star, Check, Trash2, CheckCheck, CalendarDays, Pencil, Settings } from "lucide-react";
 import { MARBLE_COLORS } from "../utils/MarbleFactory";
 import ColorPalette from "../components/ColorPickerDropdown";
 
@@ -253,19 +253,29 @@ export default function AppPage() {
         <header className="mb-6">
           <div className="flex justify-between items-center mb-2">
             <div className="">
-              <h1 className="text-3xl font-bold text-gray-900">하루마블</h1>
-              <p className="text-gray-600">오늘의 성취를 담다</p>
+              <h1 className="text-3xl font-bold text-gray-900">{currentBottle?.title || '하루마블'}</h1>
             </div>
-            <Link to="/collection" className="inline-block">
-              <Button
-                variant="outline"
-                className="flex-1 h-12 rounded-xl border-2 hover:bg-gray-50 flex items-center justify-center">
-                <div className="w-4 h-4 flex items-center" >
-                  <img src="/bottleIcon.png" alt="유리병" />
-                </div>
-                <span className="font-bold text-gray-800">내 유리병</span>
-              </Button>
-            </Link>
+            <div className="flex gap-2">
+              <Link to="/collection">
+                <Button
+                  variant="outline"
+                  className="flex-1 h-12 rounded-xl border-2 hover:bg-gray-50 flex items-center justify-center">
+                  <div className="w-4 h-4 flex items-center" >
+                    <img src="/bottleIcon.png" alt="유리병" />
+                  </div>
+                  <span className="font-bold text-gray-800">내 유리병</span>
+                </Button>
+              </Link>
+              <Link to="/settings">
+                <Button
+                  variant="outline"
+                  size="icon"
+                  className="h-12 w-12 rounded-xl border-2 hover:bg-gray-50"
+                >
+                  <Settings className="w-5 h-5 text-gray-600" />
+                </Button>
+              </Link>
+            </div>
           </div>
 
           {/* ✨ 버튼 영역 수정: Flex로 나란히 배치 */}
