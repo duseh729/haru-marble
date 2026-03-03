@@ -46,6 +46,8 @@ export class MarbleFactory {
       restitution: 0.2,
       friction: 0.005,
       frictionAir: 0.01,
+      slop: 0,
+      sleepThreshold: 30,
       render: {
         fillStyle: color,
         strokeStyle: '#ffffff',
