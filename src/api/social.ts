@@ -14,6 +14,18 @@ export const socialApi = {
         return data;
     },
 
+    // 구글 로그인 - Supabase OAuth 사용
+    googleLogin: async () => {
+        const { data, error } = await supabase.auth.signInWithOAuth({
+            provider: "google",
+            options: {
+                redirectTo: `${window.location.origin}/auth/callback`,
+            },
+        });
+        if (error) throw error;
+        return data;
+    },
+
     // 소셜 로그인 콜백 처리 (URL에서 세션 추출)
     handleAuthCallback: async () => {
         const { data, error } = await supabase.auth.getSession();
