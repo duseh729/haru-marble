@@ -20,38 +20,45 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
 function App() {
   return (
     <BrowserRouter>
-      <MobileLayout>
-        <Routes>
-          <Route path="/" element={<LandingPage />} />
-          <Route path="/login" element={<LoginPage />} />
-          <Route path="/register" element={<RegisterPage />} />
-          <Route path="/auth/callback" element={<AuthCallbackPage />} />
-          <Route
-            path="/app"
-            element={
-              <ProtectedRoute>
-                <AppPage />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/collection"
-            element={
-              <ProtectedRoute>
-                <CollectionPage />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/settings"
-            element={
-              <ProtectedRoute>
-                <SettingsPage />
-              </ProtectedRoute>
-            }
-          />
-        </Routes>
-      </MobileLayout>
+      <Routes>
+        <Route path="/" element={<LandingPage />} />
+        <Route
+          path="*"
+          element={
+            <MobileLayout>
+              <Routes>
+                <Route path="/login" element={<LoginPage />} />
+                <Route path="/register" element={<RegisterPage />} />
+                <Route path="/auth/callback" element={<AuthCallbackPage />} />
+                <Route
+                  path="/app"
+                  element={
+                    <ProtectedRoute>
+                      <AppPage />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/collection"
+                  element={
+                    <ProtectedRoute>
+                      <CollectionPage />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/settings"
+                  element={
+                    <ProtectedRoute>
+                      <SettingsPage />
+                    </ProtectedRoute>
+                  }
+                />
+              </Routes>
+            </MobileLayout>
+          }
+        />
+      </Routes>
     </BrowserRouter>
   );
 }

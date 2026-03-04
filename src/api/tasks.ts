@@ -214,6 +214,19 @@ export const bottlesApi = {
     return data as Bottle;
   },
 
+  // 유리병 이름 수정
+  updateBottleTitle: async (bottleId: number, title: string) => {
+    const { data, error } = await supabase
+      .from("bottles")
+      .update({ title })
+      .eq("id", bottleId)
+      .select()
+      .single();
+
+    if (error) throw error;
+    return data as Bottle;
+  },
+
   // 유리병 목록 + 각 병의 모든 구슬 함께 가져오기
   getBottlesWithMarbles: async () => {
     const { data, error } = await supabase
