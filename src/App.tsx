@@ -2,6 +2,8 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import LandingPage from './pages/LandingPage';
 import AppPage from './pages/AppPage';
 import CollectionPage from './pages/CollectionPage';
+import SettingsPage from './pages/SettingsPage';
+import AuthCallbackPage from './pages/AuthCallbackPage';
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
 import MobileLayout from './components/MobileLayout';
@@ -18,31 +20,38 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
 function App() {
   return (
     <BrowserRouter>
-      <Routes>
-        <Route path="/" element={<LandingPage />} />
-        <Route path="/login" element={<MobileLayout><LoginPage /></MobileLayout>} />
-        <Route path="/register" element={<MobileLayout><RegisterPage /></MobileLayout>} />
-        <Route
-          path="/app"
-          element={
-            <MobileLayout>
+      <MobileLayout>
+        <Routes>
+          <Route path="/" element={<LandingPage />} />
+          <Route path="/login" element={<LoginPage />} />
+          <Route path="/register" element={<RegisterPage />} />
+          <Route path="/auth/callback" element={<AuthCallbackPage />} />
+          <Route
+            path="/app"
+            element={
               <ProtectedRoute>
                 <AppPage />
               </ProtectedRoute>
-            </MobileLayout>
-          }
-        />
-        <Route
-          path="/collection"
-          element={
-            <MobileLayout>
+            }
+          />
+          <Route
+            path="/collection"
+            element={
               <ProtectedRoute>
                 <CollectionPage />
               </ProtectedRoute>
-            </MobileLayout>
-          }
-        />
-      </Routes>
+            }
+          />
+          <Route
+            path="/settings"
+            element={
+              <ProtectedRoute>
+                <SettingsPage />
+              </ProtectedRoute>
+            }
+          />
+        </Routes>
+      </MobileLayout>
     </BrowserRouter>
   );
 }
