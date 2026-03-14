@@ -62,11 +62,6 @@ export default function LandingPage() {
           <span className="font-bold text-gray-900">하루마블</span>
         </div>
         <div className="flex items-center gap-4">
-          <div className="hidden md:flex items-center gap-6 mr-4">
-            <span className="text-sm text-gray-500 hover:text-gray-900 cursor-pointer transition-colors">기능</span>
-            <span className="text-sm text-gray-500 hover:text-gray-900 cursor-pointer transition-colors">스크린샷</span>
-            <span className="text-sm text-gray-500 hover:text-gray-900 cursor-pointer transition-colors">다운로드</span>
-          </div>
           <button
             onClick={handleStartClick}
             className="bg-blue-500 hover:bg-blue-600 text-white text-sm font-medium px-4 py-2 rounded-lg transition-colors"
@@ -94,13 +89,6 @@ export default function LandingPage() {
           >
             <Gem className="w-4 h-4" />
             무료로 시작하기
-          </button>
-          <button
-            onClick={scrollToDemo}
-            className="bg-white hover:bg-gray-50 text-gray-700 font-semibold px-6 py-3 rounded-xl transition-colors flex items-center gap-1.5 text-sm border border-gray-200"
-          >
-            <ChevronRight className="w-4 h-4" />
-            데모 보기
           </button>
         </div>
 
@@ -143,9 +131,63 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* --- 특별한 이유 섹션 --- */}
-      <section className="px-5 md:px-12 lg:px-24 py-12 md:py-20 bg-gray-50">
+      {/* --- before & after 섹션 --- */}
+      <section className="px-5 md:px-12 lg:px-24 py-16 md:py-24 bg-gray-50">
+        <div className="max-w-6xl mx-auto flex flex-col items-center">
+          <div className="text-center mb-10 md:mb-16">
+            <h2 className="text-2xl md:text-3xl font-extrabold text-gray-900 mb-4">
+              평범한 체크리스트는 이제 그만
+            </h2>
+            <p className="text-gray-500 text-sm md:text-base break-keep">
+              할 일을 지우는 것에서 그치지 말고, 아름다운 구슬로 성취를 쌓아보세요.
+            </p>
+          </div>
 
+          <div className="flex flex-col md:flex-row items-center justify-center gap-8 md:gap-12 w-full max-w-4xl">
+            {/* Before: 기존 투두리스트 */}
+            <div className="w-full flex-1 max-w-[320px] flex flex-col items-center">
+              <div className="text-gray-400 font-bold mb-4 flex items-center gap-2">
+                <span className="text-[10px] bg-gray-200 text-gray-500 px-2 py-1 rounded font-bold tracking-wider">BEFORE</span>
+                <span className="text-sm">지루한 텍스트</span>
+              </div>
+              <div className="w-full bg-white border border-gray-200 rounded-3xl p-6 shadow-sm aspect-9/16 flex flex-col">
+                <h3 className="text-lg font-bold text-gray-800 mb-6 border-b pb-4">오늘 할 일</h3>
+                <div className="space-y-4">
+                  {[
+                    { text: '알고리즘 1문제 풀기', done: true },
+                    { text: '물 2L 마시기', done: true },
+                    { text: '스트레칭 10분', done: true },
+                    { text: '블로그 포스팅', done: false },
+                    { text: '방 청소하기', done: false },
+                  ].map((todo, idx) => (
+                    <div key={idx} className="flex items-center gap-3">
+                      <div className={`w-5 h-5 rounded flex items-center justify-center ${todo.done ? 'bg-gray-200' : 'border border-gray-300'}`}>
+                        {todo.done && <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" /></svg>}
+                      </div>
+                      <span className={`text-sm ${todo.done ? 'text-gray-400 line-through' : 'text-gray-700 font-medium'}`}>{todo.text}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            {/* VS Badge */}
+            <div className="bg-white text-gray-400 font-bold w-12 h-12 rounded-full flex items-center justify-center shadow-md border border-gray-100 z-10 -my-4 md:my-0 shrink-0">
+              VS
+            </div>
+
+            {/* After: 하루마블 */}
+            <div className="w-full flex-1 max-w-[320px] flex flex-col items-center">
+              <div className="text-blue-500 font-bold mb-4 flex items-center gap-2">
+                <span className="text-[10px] bg-blue-100 text-blue-600 px-2 py-1 rounded font-bold tracking-wider">AFTER</span>
+                <span className="text-sm">눈에 보이는 성취</span>
+              </div>
+              <div className="w-full bg-white rounded-3xl shadow-xl overflow-hidden aspect-9/16 flex items-center justify-center border-4 border-blue-50 relative">
+                <img src="/serviceInfo.png" alt="하루마블 서비스 화면" className="w-full h-full object-cover" />
+              </div>
+            </div>
+          </div>
+        </div>
       </section>
 
       {/* --- CTA 섹션 --- */}
