@@ -1,10 +1,34 @@
+import { useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import { authApi } from '@/api/auth';
-import { Gem, Star, CalendarDays, ChevronRight } from 'lucide-react';
+import { Gem, Star, CalendarDays, ChevronRight, Plus } from 'lucide-react';
+import PhysicsJar from '../components/PhysicsJar';
+import { MarbleFactory } from '../utils/MarbleFactory';
 
 export default function LandingPage() {
   const navigate = useNavigate();
+  const demoRef = useRef<HTMLDivElement>(null);
+
+  // --- 데모 상태 (서버 연동 없음, UI 전용) ---
+  const [demoMarbles, setDemoMarbles] = useState<{ id: number; text: string; color?: string }[]>([]);
+  const [demoInput, setDemoInput] = useState('');
+  const demoIdRef = useRef(1);
+
+  const DEMO_LIMIT = 10;
+
+  const addDemoMarble = () => {
+    const text = demoInput.trim();
+    if (!text || demoMarbles.length >= DEMO_LIMIT) return;
+    const id = demoIdRef.current++;
+    const color = MarbleFactory.getRandomColor();
+    setDemoMarbles(prev => [...prev, { id, text, color }]);
+    setDemoInput('');
+  };
+
+  const scrollToDemo = () => {
+    demoRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  };
 
   const handleStartClick = async () => {
     try {
@@ -72,7 +96,7 @@ export default function LandingPage() {
             무료로 시작하기
           </button>
           <button
-            onClick={handleStartClick}
+            onClick={scrollToDemo}
             className="bg-white hover:bg-gray-50 text-gray-700 font-semibold px-6 py-3 rounded-xl transition-colors flex items-center gap-1.5 text-sm border border-gray-200"
           >
             <ChevronRight className="w-4 h-4" />
@@ -80,12 +104,42 @@ export default function LandingPage() {
           </button>
         </div>
 
-        {/* 앱 스크린샷 미리보기 */}
-        <div className="mt-10 md:mt-16 mx-auto w-full max-w-[500px] h-[200px] md:h-[300px] bg-gradient-to-b from-blue-50 to-blue-100/50 rounded-2xl flex items-center justify-center border border-blue-100">
-          <div className="text-center">
-            <div className="text-4xl md:text-6xl mb-2">🏺</div>
-            <p className="text-xs md:text-sm text-blue-400">앱 스크린샷 영역</p>
+        {/* 인터랙티브 데모 */}
+        <div ref={demoRef} className="mt-10 md:mt-16 mx-auto w-full max-w-[380px]">
+          {/* 데모 입력 */}
+          <div className="flex items-center bg-white rounded-xl p-2 shadow-sm border border-gray-200 mb-4">
+            <input
+              type="text"
+              value={demoInput}
+              onChange={(e) => setDemoInput(e.target.value)}
+              onKeyDown={(e) => e.key === 'Enter' && addDemoMarble()}
+              placeholder="완료한 일을 입력해보세요!"
+              className="flex-1 bg-transparent outline-none px-3 text-sm text-gray-700 placeholder-gray-400"
+            />
+            <button
+              onClick={addDemoMarble}
+              disabled={demoMarbles.length >= DEMO_LIMIT}
+              className="bg-blue-500 hover:bg-blue-600 disabled:bg-gray-300 text-white p-2 rounded-full transition-colors"
+            >
+              <Plus className="w-4 h-4" />
+            </button>
           </div>
+
+          {/* 미니 유리병 (AppPage와 동일 크기) */}
+          <div className="mx-auto w-[320px]">
+            <div className="mx-auto w-[260px] h-8 bg-gray-200 rounded-xl" />
+            <div className="rounded-b-[2rem] rounded-t-[50px] relative w-[320px] h-[400px] bg-white border-4 border-gray-200 shadow-lg overflow-hidden">
+              <div className="absolute inset-0 flex justify-center items-end px-1">
+                <PhysicsJar marbles={demoMarbles} />
+              </div>
+            </div>
+          </div>
+
+          <p className="text-xs text-gray-400 mt-3">
+            {demoMarbles.length > 0
+              ? `${demoMarbles.length}개의 구슬을 모았어요! ${demoMarbles.length >= DEMO_LIMIT ? '(데모 최대 개수 도달)' : ''}`
+              : '로그인 없이 바로 체험해보세요 ✨'}
+          </p>
         </div>
       </section>
 
