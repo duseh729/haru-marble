@@ -10,6 +10,7 @@ import PrivacyPolicyPage from './pages/PrivacyPolicyPage';
 import MobileLayout from './components/MobileLayout';
 import { authApi } from './api/auth';
 import AboutUsPage from './pages/AboutUsPage';
+import ContactUsPage from './pages/ContactUsPage';
 
 // 보호된 라우트 컴포넌트
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
@@ -34,6 +35,7 @@ function App() {
                 <Route path="/auth/callback" element={<AuthCallbackPage />} />
                 <Route path="/privacy" element={<PrivacyPolicyPage />} />
                 <Route path="/about-us" element={<AboutUsPage />} />
+                <Route path="/contact-us" element={<ContactUsPage />} />
                 <Route
                   path="/app"
                   element={
