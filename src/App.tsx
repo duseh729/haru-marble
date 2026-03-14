@@ -6,6 +6,7 @@ import SettingsPage from './pages/SettingsPage';
 import AuthCallbackPage from './pages/AuthCallbackPage';
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
+import PrivacyPolicyPage from './pages/PrivacyPolicyPage';
 import MobileLayout from './components/MobileLayout';
 import { authApi } from './api/auth';
 
@@ -30,6 +31,7 @@ function App() {
                 <Route path="/login" element={<LoginPage />} />
                 <Route path="/register" element={<RegisterPage />} />
                 <Route path="/auth/callback" element={<AuthCallbackPage />} />
+                <Route path="/privacy" element={<PrivacyPolicyPage />} />
                 <Route
                   path="/app"
                   element={
