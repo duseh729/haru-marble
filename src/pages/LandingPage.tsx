@@ -145,70 +145,7 @@ export default function LandingPage() {
 
       {/* --- 특별한 이유 섹션 --- */}
       <section className="px-5 md:px-12 lg:px-24 py-12 md:py-20 bg-gray-50">
-        <div className="text-center mb-8 md:mb-12 max-w-4xl mx-auto">
-          <span className="text-xs font-semibold text-blue-500 tracking-wider uppercase">핵심 기능</span>
-          <h2 className="text-xl md:text-3xl font-extrabold text-gray-900 mt-2">하루마블이 특별한 이유</h2>
-          <p className="text-xs md:text-sm text-gray-400 mt-2">단순한 투두리스트를 넘어선 시각적 성취 경험</p>
-        </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-3 md:gap-5 max-w-4xl mx-auto">
-          {/* 기능 1 */}
-          <div className="bg-white rounded-2xl p-5 md:p-6 shadow-sm border border-gray-100">
-            <div className="w-10 h-10 md:w-12 md:h-12 bg-blue-50 rounded-xl flex items-center justify-center mb-3">
-              <Gem className="w-5 h-5 md:w-6 md:h-6 text-blue-500" />
-            </div>
-            <h3 className="font-bold text-gray-900 text-sm md:text-base mb-1">유리구슬 비주얼</h3>
-            <p className="text-xs md:text-sm text-gray-400 leading-relaxed">
-              할 일을 완료할 때마다 예쁜 유리구슬을 모아 구슬을 모으는 즐거움을 느껴요.
-            </p>
-          </div>
-
-          {/* 기능 2 */}
-          <div className="bg-white rounded-2xl p-5 md:p-6 shadow-sm border border-gray-100">
-            <div className="w-10 h-10 md:w-12 md:h-12 bg-yellow-50 rounded-xl flex items-center justify-center mb-3">
-              <Star className="w-5 h-5 md:w-6 md:h-6 text-yellow-500" />
-            </div>
-            <h3 className="font-bold text-gray-900 text-sm md:text-base mb-1">퀵 액션</h3>
-            <p className="text-xs md:text-sm text-gray-400 leading-relaxed">
-              자주 하는 일을 빠르게 등록하고 효율적으로 한 일을 기록해요.
-            </p>
-          </div>
-
-          {/* 기능 3 */}
-          <div className="bg-white rounded-2xl p-5 md:p-6 shadow-sm border border-gray-100">
-            <div className="w-10 h-10 md:w-12 md:h-12 bg-green-50 rounded-xl flex items-center justify-center mb-3">
-              <CalendarDays className="w-5 h-5 md:w-6 md:h-6 text-green-500" />
-            </div>
-            <h3 className="font-bold text-gray-900 text-sm md:text-base mb-1">컬렉션 보관</h3>
-            <p className="text-xs md:text-sm text-gray-400 leading-relaxed">
-              한 병이 차면 선반에 보관하고 특별한 컬렉션을 확인하는 즐거움도 있어요.
-            </p>
-          </div>
-        </div>
-      </section>
-
-      {/* --- 스크린샷 미리보기 섹션 --- */}
-      <section className="px-5 md:px-12 lg:px-24 py-12 md:py-20">
-        <div className="text-center mb-8 md:mb-12">
-          <span className="text-xs font-semibold text-blue-500 tracking-wider uppercase">스크린샷</span>
-          <h2 className="text-xl md:text-3xl font-extrabold text-gray-900 mt-2">직관적이고 아름다운 디자인</h2>
-        </div>
-
-        <div className="flex gap-3 md:gap-5 overflow-x-auto md:overflow-visible md:justify-center pb-2 -mx-1 px-1 snap-x">
-          {[
-            { label: '구슬 모으기', emoji: '🔮', bg: 'from-blue-50 to-indigo-50' },
-            { label: '컬렉션 보기', emoji: '🏺', bg: 'from-purple-50 to-pink-50' },
-            { label: '통계 확인', emoji: '📊', bg: 'from-green-50 to-emerald-50' },
-          ].map((item) => (
-            <div
-              key={item.label}
-              className={`shrink-0 w-[140px] md:w-[200px] h-[200px] md:h-[280px] bg-gradient-to-b ${item.bg} rounded-2xl flex flex-col items-center justify-center snap-start border border-gray-100`}
-            >
-              <div className="text-3xl md:text-5xl mb-3">{item.emoji}</div>
-              <span className="text-xs md:text-sm font-medium text-gray-500">{item.label}</span>
-            </div>
-          ))}
-        </div>
       </section>
 
       {/* --- CTA 섹션 --- */}
