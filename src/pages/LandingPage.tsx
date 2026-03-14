@@ -203,7 +203,7 @@ export default function LandingPage() {
       </section>
 
       {/* --- 푸터 --- */}
-      <footer className="px-5 md:px-12 lg:px-24 py-8 border-t border-gray-100 max-w-6xl mx-auto md:flex md:items-center md:justify-between">
+      <footer className="px-5 md:px-12 lg:px-24 py-12 border-t border-gray-100 max-w-6xl mx-auto flex flex-col md:flex-row md:items-center md:justify-between gap-6">
         <div>
           <div className="flex items-center gap-2 mb-2">
             <div className="w-6 h-6 bg-blue-500 rounded-md flex items-center justify-center">
@@ -213,7 +213,14 @@ export default function LandingPage() {
           </div>
           <p className="text-xs text-gray-400">오늘의 성취를 담는 유리병</p>
         </div>
-        <p className="text-xs text-gray-300 mt-4 md:mt-0">© 2025 하루마블. All rights reserved.</p>
+
+        <div className="flex gap-4 md:gap-6 text-xs text-gray-500">
+          <button onClick={() => navigate('/about-us')} className="hover:text-gray-900 transition-colors">서비스 소개</button>
+          <button onClick={() => navigate('/privacy')} className="hover:text-gray-900 transition-colors">개인정보처리방침</button>
+          <button onClick={() => navigate('/contact-us')} className="hover:text-gray-900 transition-colors">문의하기</button>
+        </div>
+
+        <p className="text-xs text-gray-300">© 2026 하루마블. All rights reserved.</p>
       </footer>
     </div>
   );
