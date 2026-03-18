@@ -46,6 +46,19 @@ export const authApi = {
     if (error) throw error;
   },
 
+  // 회원탈퇴
+  // ⚠️ Supabase DB에 아래 SQL로 delete_user 함수를 미리 생성해야 합니다:
+  // create or replace function delete_user()
+  // returns void language plpgsql security definer as $$
+  // begin
+  //   delete from auth.users where id = auth.uid();
+  // end;
+  // $$;
+  deleteAccount: async () => {
+    const { error } = await supabase.rpc('delete_user');
+    if (error) throw error;
+  },
+
   // 인증 여부 확인 (동기적 확인은 세션 상태를 가져오는 방식으로 변경)
   isAuthenticated: async () => {
     const { data: { session } } = await supabase.auth.getSession();
