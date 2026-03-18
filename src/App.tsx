@@ -1,4 +1,5 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { useState, useEffect } from 'react';
 import LandingPage from './pages/LandingPage';
 import AppPage from './pages/AppPage';
 import CollectionPage from './pages/CollectionPage';
@@ -12,13 +13,31 @@ import { authApi } from './api/auth';
 import AboutUsPage from './pages/AboutUsPage';
 import ContactUsPage from './pages/ContactUsPage';
 
-// 보호된 라우트 컴포넌트
+// 보호된 라우트 컴포넌트 (비동기 세션 확인)
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
-  if (!authApi.isAuthenticated()) {
+  const [status, setStatus] = useState<'loading' | 'auth' | 'unauth'>('loading');
+
+  useEffect(() => {
+    authApi.isAuthenticated().then((ok) => {
+      setStatus(ok ? 'auth' : 'unauth');
+    });
+  }, []);
+
+  if (status === 'loading') {
+    return (
+      <div className="w-full min-h-dvh flex items-center justify-center">
+        <div className="w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full animate-spin" />
+      </div>
+    );
+  }
+
+  if (status === 'unauth') {
     return <Navigate to="/login" replace />;
   }
+
   return <>{children}</>;
 };
+
 
 function App() {
   return (
