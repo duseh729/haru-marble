@@ -15,6 +15,7 @@ interface Task {
 
 interface PhysicsJarProps {
   marbles: Task[];
+  marbleRadius?: number;
   onPositionsSettled?: (positions: { id: number; position_x: number; position_y: number }[]) => void;
   onMarbleClick?: (taskId: number) => void;
 }
@@ -26,7 +27,7 @@ interface TooltipInfo {
   taskId: number;
 }
 
-export default function PhysicsJar({ marbles, onPositionsSettled, onMarbleClick }: PhysicsJarProps) {
+export default function PhysicsJar({ marbles, marbleRadius = 22, onPositionsSettled, onMarbleClick }: PhysicsJarProps) {
   const sceneRef = useRef<HTMLDivElement>(null);
   const engineRef = useRef<Matter.Engine | null>(null);
   const runnerRef = useRef<Matter.Runner | null>(null);
@@ -217,7 +218,7 @@ export default function PhysicsJar({ marbles, onPositionsSettled, onMarbleClick 
       const x = 150 + (Math.random() - 0.5) * 100;
       const y = -50 - i * 30;
 
-      const marble = MarbleFactory.createWithColor(x, y, 22, color);
+      const marble = MarbleFactory.createWithColor(x, y, marbleRadius, color);
       Matter.World.add(engineRef.current!.world, marble);
       renderedIdsRef.current.add(task.id);
       marbleMapRef.current.set(marble, task);

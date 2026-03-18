@@ -6,8 +6,11 @@ import SettingsPage from './pages/SettingsPage';
 import AuthCallbackPage from './pages/AuthCallbackPage';
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
+import PrivacyPolicyPage from './pages/PrivacyPolicyPage';
 import MobileLayout from './components/MobileLayout';
 import { authApi } from './api/auth';
+import AboutUsPage from './pages/AboutUsPage';
+import ContactUsPage from './pages/ContactUsPage';
 
 // 보호된 라우트 컴포넌트
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
@@ -20,38 +23,48 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
 function App() {
   return (
     <BrowserRouter>
-      <MobileLayout>
-        <Routes>
-          <Route path="/" element={<LandingPage />} />
-          <Route path="/login" element={<LoginPage />} />
-          <Route path="/register" element={<RegisterPage />} />
-          <Route path="/auth/callback" element={<AuthCallbackPage />} />
-          <Route
-            path="/app"
-            element={
-              <ProtectedRoute>
-                <AppPage />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/collection"
-            element={
-              <ProtectedRoute>
-                <CollectionPage />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/settings"
-            element={
-              <ProtectedRoute>
-                <SettingsPage />
-              </ProtectedRoute>
-            }
-          />
-        </Routes>
-      </MobileLayout>
+      <Routes>
+        <Route path="/" element={<LandingPage />} />
+        <Route
+          path="*"
+          element={
+            <MobileLayout>
+              <Routes>
+                <Route path="/login" element={<LoginPage />} />
+                <Route path="/register" element={<RegisterPage />} />
+                <Route path="/auth/callback" element={<AuthCallbackPage />} />
+                <Route path="/privacy" element={<PrivacyPolicyPage />} />
+                <Route path="/about-us" element={<AboutUsPage />} />
+                <Route path="/contact-us" element={<ContactUsPage />} />
+                <Route
+                  path="/app"
+                  element={
+                    <ProtectedRoute>
+                      <AppPage />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/collection"
+                  element={
+                    <ProtectedRoute>
+                      <CollectionPage />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/settings"
+                  element={
+                    <ProtectedRoute>
+                      <SettingsPage />
+                    </ProtectedRoute>
+                  }
+                />
+              </Routes>
+            </MobileLayout>
+          }
+        />
+      </Routes>
     </BrowserRouter>
   );
 }
