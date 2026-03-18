@@ -74,7 +74,7 @@ export default function LoginPage() {
 
       <div className="max-w-md w-full bg-white rounded-3xl shadow-xl p-8 space-y-6">
         <div className="text-center">
-          <h1 className="text-3xl font-bold text-gray-900">돌아오셨군요! 👋</h1>
+          <h1 className="text-3xl font-bold text-gray-900">안녕하세요!</h1>
           <p className="text-gray-500 mt-2">오늘의 성취를 기록하러 가볼까요?</p>
         </div>
 
@@ -82,8 +82,8 @@ export default function LoginPage() {
           {/* 에러 메시지 */}
           {error && (
             <div className={`text-sm p-3 rounded-lg text-center font-medium ${isRateLimited
-                ? 'bg-orange-50 text-orange-600 border border-orange-200'
-                : 'bg-red-50 text-red-500'
+              ? 'bg-orange-50 text-orange-600 border border-orange-200'
+              : 'bg-red-50 text-red-500'
               }`}>
               {isRateLimited && (
                 <div className="flex items-center justify-center gap-1.5 mb-1">
