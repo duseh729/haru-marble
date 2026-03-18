@@ -6,9 +6,27 @@ export const authApi = {
     const { data, error } = await supabase.auth.signUp({
       email,
       password,
+      options: {
+        emailRedirectTo: `${window.location.origin}/auth/callback`,
+      },
     });
     if (error) throw error;
+
+    // identities가 빈 배열 = 이미 가입된 이메일 (Supabase 보안 정책상 에러 대신 빈 값 반환)
+    if (data.user?.identities?.length === 0) {
+      throw new Error('이미 사용 중인 이메일입니다. 로그인 페이지에서 로그인해주세요.');
+    }
+
     return data;
+  },
+
+  // 이메일 인증 재발송
+  resendVerificationEmail: async (email: string) => {
+    const { error } = await supabase.auth.resend({
+      type: "signup",
+      email,
+    });
+    if (error) throw error;
   },
 
   // 로그인
@@ -18,7 +36,7 @@ export const authApi = {
       password,
     });
     if (error) throw error;
-    
+
     return data;
   },
 

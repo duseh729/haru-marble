@@ -5,21 +5,48 @@ import { socialApi } from '../api/social';
 import { Button } from '@/components/ui/button';
 import { Helmet } from 'react-helmet-async';
 
+// Supabase 에러 메시지를 한국어로 변환
+function translateError(message: string): string {
+  if (message.includes('Invalid login credentials')) return '이메일 또는 비밀번호가 올바르지 않습니다.';
+  if (message.includes('Email not confirmed')) return '이메일 인증이 완료되지 않았습니다. 메일함을 확인해주세요.';
+  if (message.includes('Too many requests') || message.includes('rate limit') || message.includes('over_email_send_rate_limit'))
+    return '로그인 시도가 너무 많습니다. 잠시 후 다시 시도해주세요.';
+  if (message.includes('User not found')) return '등록되지 않은 이메일입니다.';
+  return message;
+}
+
 export default function LoginPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const [isRateLimited, setIsRateLimited] = useState(false);
   const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
+    setIsLoading(true);
 
     try {
       await authApi.login(email, password);
       navigate('/app');
     } catch (err: any) {
-      setError(err.message || '로그인 중 오류가 발생했습니다.');
+      const msg: string = err.message || '';
+      const translated = translateError(msg);
+      setError(translated);
+
+      // Supabase rate limit 에러 감지
+      if (
+        msg.includes('Too many requests') ||
+        msg.includes('rate limit') ||
+        msg.includes('over_email_send_rate_limit') ||
+        msg.includes('Request rate limit')
+      ) {
+        setIsRateLimited(true);
+      }
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -52,8 +79,21 @@ export default function LoginPage() {
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-4">
+          {/* 에러 메시지 */}
           {error && (
-            <div className="bg-red-50 text-red-500 text-sm p-3 rounded-lg text-center font-medium">
+            <div className={`text-sm p-3 rounded-lg text-center font-medium ${isRateLimited
+                ? 'bg-orange-50 text-orange-600 border border-orange-200'
+                : 'bg-red-50 text-red-500'
+              }`}>
+              {isRateLimited && (
+                <div className="flex items-center justify-center gap-1.5 mb-1">
+                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+                      d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" />
+                  </svg>
+                  <span className="font-semibold">로그인 일시 차단됨</span>
+                </div>
+              )}
               {error}
             </div>
           )}
@@ -63,7 +103,8 @@ export default function LoginPage() {
             <input
               type="email"
               required
-              className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all bg-gray-50 focus:bg-white"
+              disabled={isLoading}
+              className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all bg-gray-50 focus:bg-white disabled:opacity-60"
               placeholder="hello@example.com"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
@@ -75,15 +116,25 @@ export default function LoginPage() {
             <input
               type="password"
               required
-              className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all bg-gray-50 focus:bg-white"
+              disabled={isLoading}
+              className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all bg-gray-50 focus:bg-white disabled:opacity-60"
               placeholder="••••••••"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
             />
           </div>
 
-          <Button type="submit" className="w-full h-12 text-lg rounded-xl bg-blue-600 hover:bg-blue-700 shadow-lg shadow-blue-200">
-            로그인하기
+          <Button
+            type="submit"
+            disabled={isLoading}
+            className="w-full h-12 text-lg rounded-xl bg-blue-600 hover:bg-blue-700 shadow-lg shadow-blue-200 disabled:opacity-60"
+          >
+            {isLoading ? (
+              <span className="flex items-center justify-center gap-2">
+                <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                로그인 중...
+              </span>
+            ) : '로그인하기'}
           </Button>
         </form>
 
