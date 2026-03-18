@@ -2,7 +2,7 @@ import { useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import { authApi } from '@/api/auth';
-import { Star, CalendarDays, ChevronRight, Plus } from 'lucide-react';
+import { Plus } from 'lucide-react';
 import PhysicsJar from '../components/PhysicsJar';
 import { MarbleFactory } from '../utils/MarbleFactory';
 
@@ -26,9 +26,7 @@ export default function LandingPage() {
     setDemoInput('');
   };
 
-  const scrollToDemo = () => {
-    demoRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
-  };
+
 
   const handleStartClick = async () => {
     try {

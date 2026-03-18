@@ -30,7 +30,7 @@ interface QuickActionItem {
 export default function AppPage() {
   const [tasks, setTasks] = useState<Task[]>([]);
   const [input, setInput] = useState("");
-  const [isLoading, setIsLoading] = useState(true);
+  const [_isLoading, setIsLoading] = useState(true);
   const [selectedColor, setSelectedColor] = useState<string>(MARBLE_COLORS[0]);
   const [showColorPicker, setShowColorPicker] = useState(false);
   const colorPickerRef = useRef<HTMLDivElement>(null);
