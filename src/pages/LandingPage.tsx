@@ -2,7 +2,7 @@ import { useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import { authApi } from '@/api/auth';
-import { Gem, Star, CalendarDays, ChevronRight, Plus } from 'lucide-react';
+import { Star, CalendarDays, ChevronRight, Plus } from 'lucide-react';
 import PhysicsJar from '../components/PhysicsJar';
 import { MarbleFactory } from '../utils/MarbleFactory';
 
@@ -56,9 +56,7 @@ export default function LandingPage() {
       {/* --- 네비게이션 --- */}
       <nav className="flex items-center justify-between px-5 md:px-12 lg:px-24 py-4 max-w-6xl mx-auto">
         <div className="flex items-center gap-2">
-          <div className="w-7 h-7 bg-blue-500 rounded-lg flex items-center justify-center">
-            <Gem className="w-4 h-4 text-white" />
-          </div>
+          <img src="/logo192.png" alt="하루마블 로고" className="w-10 h-10" />
           <span className="font-bold text-gray-900">하루마블</span>
         </div>
         <div className="flex items-center gap-4">
@@ -87,7 +85,7 @@ export default function LandingPage() {
             onClick={handleStartClick}
             className="bg-blue-500 hover:bg-blue-600 text-white font-semibold px-6 py-3 rounded-xl transition-colors flex items-center gap-1.5 text-sm shadow-lg shadow-blue-500/25"
           >
-            <Gem className="w-4 h-4" />
+            <img src="/logo192.png" alt="로고" className="w-5 h-5 rounded-md mix-blend-screen opacity-90" />
             무료로 시작하기
           </button>
         </div>
@@ -206,9 +204,7 @@ export default function LandingPage() {
       <footer className="px-5 md:px-12 lg:px-24 py-12 border-t border-gray-100 max-w-6xl mx-auto flex flex-col md:flex-row md:items-center md:justify-between gap-6">
         <div>
           <div className="flex items-center gap-2 mb-2">
-            <div className="w-6 h-6 bg-blue-500 rounded-md flex items-center justify-center">
-              <Gem className="w-3 h-3 text-white" />
-            </div>
+            <img src="/logo192.png" alt="하루마블 로고" className="w-7 h-7" />
             <span className="font-bold text-sm text-gray-900">하루마블</span>
           </div>
           <p className="text-xs text-gray-400">오늘의 성취를 담는 유리병</p>
