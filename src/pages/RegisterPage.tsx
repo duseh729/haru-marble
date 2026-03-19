@@ -88,10 +88,18 @@ export default function RegisterPage() {
   // ── 이메일 인증 대기 화면 ──
   if (emailSent) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4">
+      <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50 px-4 gap-8 md:gap-0 relative">
         <Helmet>
           <title>이메일 인증 - Done List</title>
         </Helmet>
+
+        {/* 홈으로 돌아가기 */}
+        <div className="w-full max-w-md md:w-auto md:absolute md:top-8 md:left-8">
+          <Link to="/" className="flex items-center gap-2 hover:opacity-80 transition-opacity p-2 -ml-2 md:ml-0">
+            <img src="/logo192.png" alt="하루마블 로고" className="w-8 h-8" />
+            <span className="font-bold text-gray-900 text-lg">하루마블</span>
+          </Link>
+        </div>
         <div className="max-w-md w-full bg-white rounded-3xl shadow-xl p-8 space-y-6 text-center">
           <div className="w-20 h-20 rounded-full bg-blue-50 flex items-center justify-center mx-auto">
             <svg className="w-10 h-10 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -128,7 +136,7 @@ export default function RegisterPage() {
 
             <Link
               to="/login"
-              className="block w-full h-11 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold flex items-center justify-center transition-all shadow-lg shadow-blue-200"
+              className="w-full h-11 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold flex items-center justify-center transition-all shadow-lg shadow-blue-200"
             >
               로그인 페이지로 이동
             </Link>
@@ -144,14 +152,22 @@ export default function RegisterPage() {
 
   // ── 회원가입 폼 ──
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4">
+    <div className="min-h-screen flex flex-col px-4 gap-0 md:gap-8">
       <Helmet>
         <title>회원가입 - Done List</title>
       </Helmet>
 
+      {/* 홈으로 돌아가기 */}
+      <div className="w-full max-w-md ">
+        <Link to="/" className="flex items-center gap-2 hover:opacity-80 transition-opacity p-2 -ml-2 md:ml-0">
+          <img src="/logo192.png" alt="하루마블 로고" className="w-8 h-8" />
+          <span className="font-bold text-gray-900 text-lg">하루마블</span>
+        </Link>
+      </div>
+
       <div className="max-w-md w-full bg-white rounded-3xl shadow-xl p-8 space-y-6">
         <div className="text-center">
-          <h1 className="text-3xl font-bold text-gray-900">환영합니다! 🎉</h1>
+          <h1 className="text-3xl font-bold text-gray-900">환영합니다!</h1>
           <p className="text-gray-500 mt-2">나만의 성취감을 기록할 준비가 되셨나요?</p>
         </div>
 
@@ -221,8 +237,8 @@ export default function RegisterPage() {
               type="password"
               required
               className={`w-full px-4 py-3 rounded-xl border transition-all bg-gray-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 ${confirmPassword && confirmPassword !== password
-                  ? 'border-red-300 focus:ring-red-400'
-                  : 'border-gray-200'
+                ? 'border-red-300 focus:ring-red-400'
+                : 'border-gray-200'
                 }`}
               placeholder="••••••••"
               value={confirmPassword}

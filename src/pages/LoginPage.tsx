@@ -67,10 +67,18 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4">
+    <div className="min-h-screen flex flex-col px-4 gap-0 md:gap-8">
       <Helmet>
         <title>로그인 - Done List</title>
       </Helmet>
+
+      {/* 홈으로 돌아가기 */}
+      <div className="w-full max-w-md">
+        <Link to="/" className="flex items-center gap-2 hover:opacity-80 transition-opacity p-2 -ml-2 md:ml-0">
+          <img src="/logo192.png" alt="하루마블 로고" className="w-8 h-8" />
+          <span className="font-bold text-gray-900 text-lg">하루마블</span>
+        </Link>
+      </div>
 
       <div className="max-w-md w-full bg-white rounded-3xl shadow-xl p-8 space-y-6">
         <div className="text-center">
