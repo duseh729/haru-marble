@@ -34,7 +34,7 @@ export default function SettingsPage() {
     const isConfirmValid = deleteConfirmText === "탈퇴";
 
     return (
-        <div className="w-full min-h-dvh flex flex-col">
+        <div className="w-full h-full flex flex-col">
             <Helmet>
                 <title>설정 - Done List</title>
             </Helmet>

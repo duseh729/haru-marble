@@ -38,7 +38,7 @@ export default function AuthCallbackPage() {
     }, [navigate]);
 
     return (
-        <div className="w-full min-h-dvh flex items-center justify-center">
+        <div className="w-full h-full flex items-center justify-center">
             <div className="text-center space-y-3">
                 <div className="w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto" />
                 <p className="text-gray-500">{message}</p>

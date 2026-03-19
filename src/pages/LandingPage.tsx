@@ -43,7 +43,7 @@ export default function LandingPage() {
   };
 
   return (
-    <div className="w-full min-h-dvh bg-white overflow-y-auto">
+    <div className="w-full min-h-screen bg-white overflow-y-auto">
       <Helmet>
         <title>하루마블 - 오늘의 성취를 구슬로 시각화하다</title>
         <meta name="description" content="오늘 한 일을 기록하고 유리병에 구슬을 채워보세요. 시각적인 성취감을 드립니다." />
@@ -187,7 +187,7 @@ export default function LandingPage() {
       </section>
 
       {/* --- CTA 섹션 --- */}
-      <section className="mx-5 md:mx-auto mb-8 md:mb-16 max-w-3xl bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl px-6 md:px-12 py-10 md:py-14 text-center">
+      <section className="mx-5 md:mx-auto mb-8 md:mb-16 max-w-3xl bg-linear-to-br from-blue-500 to-blue-600 rounded-2xl px-6 md:px-12 py-10 md:py-14 text-center">
         <h2 className="text-xl md:text-3xl font-extrabold text-white mb-2">지금 바로 시작하세요</h2>
         <p className="text-blue-100 text-xs md:text-sm mb-6">매일의 성취를 기록하고, 오늘의 성취를 남겨보세요.</p>
         <button

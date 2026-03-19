@@ -243,7 +243,7 @@ export default function AppPage() {
   }, []);
 
   return (
-    <div className="w-full min-h-dvh flex flex-col">
+    <div className="w-full h-full flex flex-col">
       <Helmet>
         <title>내 유리병 - Done List</title>
       </Helmet>
@@ -428,8 +428,8 @@ export default function AppPage() {
                       key={action.id}
                       onClick={() => toggleSelection(action.id)}
                       className={`flex items-center justify-between p-6 transition-colors ${isSelected
-                        ? "bg-blue-600 hover:bg-blue-700 text-white border-blue-600 border-1" // 선택 시: 파란 배경 + 흰색 글자
-                        : "bg-white hover:bg-gray-50 text-gray-900 border-gray-200 border-1"  // 미선택 시: 흰색 배경 + 회색 글자
+                        ? "bg-blue-600 hover:bg-blue-700 text-white border-blue-600 border" // 선택 시: 파란 배경 + 흰색 글자
+                        : "bg-white hover:bg-gray-50 text-gray-900 border-gray-200 border"  // 미선택 시: 흰색 배경 + 회색 글자
                         }`}
                     >
                       <span className="truncate">{action.text}</span>
@@ -593,7 +593,7 @@ export default function AppPage() {
       )}
       {/* --- 삭제 확인 모달 --- */}
       {deleteTargetId !== null && (
-        <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/50 backdrop-blur-sm p-4 animate-in fade-in duration-200">
+        <div className="fixed inset-0 z-60 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4 animate-in fade-in duration-200">
           <div className="bg-white w-full max-w-[280px] rounded-3xl p-6 shadow-2xl animate-in zoom-in-95 duration-200 text-center">
             <div className="w-12 h-12 mx-auto mb-4 rounded-full bg-red-100 flex items-center justify-center">
               <Trash2 className="w-6 h-6 text-red-500" />
