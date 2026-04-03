@@ -1,0 +1,8 @@
+User-agent: *
+Allow: /
+Disallow: /app
+Disallow: /collection
+Disallow: /settings
+Disallow: /auth/callback
+
+Sitemap: https://haru-marble.com/sitemap.xml

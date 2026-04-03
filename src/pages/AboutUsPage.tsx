@@ -1,10 +1,15 @@
 import { useNavigate } from 'react-router-dom';
+import { Helmet } from 'react-helmet-async';
 
 export default function AboutUsPage() {
     const navigate = useNavigate();
 
     return (
         <div className="flex flex-col h-full bg-white relative">
+            <Helmet>
+                <title>서비스 소개 - 하루마블</title>
+                <meta name="description" content="하루마블(Haru Marble)의 탄생 배경과 미션을 소개합니다. 당신의 작은 성취를 시각적인 즐거움으로 바꿔보세요." />
+            </Helmet>
             {/* Header */}
             <header className="flex items-center justify-between px-6 py-4 sticky top-0 bg-white/80 backdrop-blur-md z-10 border-b border-gray-100">
                 <button
@@ -59,7 +64,7 @@ export default function AboutUsPage() {
                     <section className="space-y-4">
                         <h3 className="text-lg font-bold text-gray-800 border-b pb-2">만든 사람</h3>
                         <div className="flex items-center space-x-4">
-                            <div className="w-16 h-16 bg-gradient-to-br from-blue-100 to-purple-100 rounded-full flex items-center justify-center text-2xl">
+                            <div className="w-16 h-16 bg-linear-to-br from-blue-100 to-purple-100 rounded-full flex items-center justify-center text-2xl">
                                 👨‍💻
                             </div>
                             <div>

@@ -1,10 +1,15 @@
 import { useNavigate } from 'react-router-dom';
+import { Helmet } from 'react-helmet-async';
 
 export default function PrivacyPolicyPage() {
     const navigate = useNavigate();
 
     return (
         <div className="flex flex-col h-full bg-white relative">
+            <Helmet>
+                <title>개인정보처리방침 - 하루마블</title>
+                <meta name="description" content="하루마블(Haru Marble)의 개인정보처리방침을 확인하세요. 이용자의 개인정보를 소중히 다룹니다." />
+            </Helmet>
             {/* Header */}
             <header className="flex items-center justify-between px-6 py-4 sticky top-0 bg-white/80 backdrop-blur-md z-10 border-b border-gray-100">
                 <button

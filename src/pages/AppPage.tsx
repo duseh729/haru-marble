@@ -245,7 +245,7 @@ export default function AppPage() {
   return (
     <div className="w-full h-full flex flex-col">
       <Helmet>
-        <title>내 유리병 - Done List</title>
+        <title>내 유리병 - 하루마블</title>
       </Helmet>
 
       <div className="px-5 flex-1 flex flex-col">

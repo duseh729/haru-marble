@@ -69,7 +69,8 @@ export default function LoginPage() {
   return (
     <div className="min-h-screen flex flex-col px-4 gap-0 md:gap-8">
       <Helmet>
-        <title>로그인 - Done List</title>
+        <title>로그인 - 하루마블</title>
+        <meta name="description" content="하루마블(Haru Marble)에 로그인하고 오늘의 성취를 기록하세요." />
       </Helmet>
 
       {/* 홈으로 돌아가기 */}

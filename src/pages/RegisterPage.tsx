@@ -90,7 +90,7 @@ export default function RegisterPage() {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50 px-4 gap-8 md:gap-0 relative">
         <Helmet>
-          <title>이메일 인증 - Done List</title>
+          <title>이메일 인증 - 하루마블</title>
         </Helmet>
 
         {/* 홈으로 돌아가기 */}
@@ -154,7 +154,8 @@ export default function RegisterPage() {
   return (
     <div className="min-h-screen flex flex-col px-4 gap-0 md:gap-8">
       <Helmet>
-        <title>회원가입 - Done List</title>
+        <title>회원가입 - 하루마블</title>
+        <meta name="description" content="하루마블(Haru Marble)에 가입하고 오늘의 작은 성취들을 구슬로 기록해보세요." />
       </Helmet>
 
       {/* 홈으로 돌아가기 */}
