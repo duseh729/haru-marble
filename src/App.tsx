@@ -12,6 +12,7 @@ import MobileLayout from './components/MobileLayout';
 import { authApi } from './api/auth';
 import AboutUsPage from './pages/AboutUsPage';
 import ContactUsPage from './pages/ContactUsPage';
+import NotFoundPage from './pages/NotFoundPage';
 
 // 보호된 라우트 컴포넌트 (비동기 세션 확인)
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
@@ -79,6 +80,8 @@ function App() {
                     </ProtectedRoute>
                   }
                 />
+                {/* 404 Not Found */}
+                <Route path="*" element={<NotFoundPage />} />
               </Routes>
             </MobileLayout>
           }
