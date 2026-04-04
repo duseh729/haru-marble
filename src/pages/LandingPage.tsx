@@ -98,7 +98,7 @@ export default function LandingPage() {
               onChange={(e) => setDemoInput(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && addDemoMarble()}
               placeholder="완료한 일을 입력해보세요!"
-              className="flex-1 bg-transparent outline-none px-3 text-sm text-gray-700 placeholder-gray-400"
+              className="flex-1 bg-transparent outline-none text-sm text-gray-700 placeholder-gray-400"
             />
             <button
               onClick={addDemoMarble}
