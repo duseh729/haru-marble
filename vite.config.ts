@@ -12,7 +12,11 @@ export default defineConfig({
     },
   },
   server: {
-    host: true, // 또는 '0.0.0.0' (모든 네트워크 인터페이스 허용)
-    port: 5173, // 사용할 포트 번호 (ngrok 설정과 맞춰주세요)
+    host: true, // 로컬망(192.168.x.x) 및 ngrok 접속 허용
+    port: 5173,
+    allowedHosts: true, // Vite 5+ 보안 정책: ngrok 같은 터널 주소 접속 허용
+    hmr: {
+      clientPort: 443, // ngrok HTTPS 터널 사용 시 HMR이 끊기지 않도록 설정
+    },
   },
 });
