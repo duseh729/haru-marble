@@ -1,7 +1,6 @@
 import { useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
-import { authApi } from '@/api/auth';
 import { Plus } from 'lucide-react';
 import PhysicsJar from '../components/PhysicsJar';
 import GlassJar from '../components/GlassJar';
@@ -29,18 +28,10 @@ export default function LandingPage() {
 
 
 
-  const handleStartClick = async () => {
-    try {
-      const isLoggined = await authApi.isAuthenticated();
-      if (isLoggined) {
-        navigate('/app');
-      } else {
-        navigate('/login');
-      }
-    } catch (error) {
-      console.error("인증 확인 중 오류 발생:", error);
-      navigate('/login');
-    }
+  const handleStartClick = () => {
+    // 가장 빠른 사용자 경험을 위해 즉시 /login으로 보냅니다.
+    // 이미 로그인되어 있다면 로그인 페이지 내부 로직이 자동으로 /app으로 보내줄 것입니다.
+    navigate('/login');
   };
 
   return (
