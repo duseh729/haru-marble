@@ -2,6 +2,7 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import { Helmet } from "react-helmet-async";
 import PhysicsJar from "../components/PhysicsJar";
 import GlassJar from "../components/GlassJar";
+import AdBanner from "../components/AdBanner";
 import { Button } from "@/components/ui/button";
 import { Plus, X, Star, Check, Trash2, CheckCheck, CalendarDays, Pencil, Settings } from "lucide-react";
 import { MARBLE_COLORS } from "../utils/MarbleFactory";
@@ -251,7 +252,7 @@ export default function AppPage() {
 
       <div className="px-5 flex-1 flex flex-col">
         {/* --- 상단 헤더 --- */}
-        <header className="mb-4 md:mb-6">
+        <header className="mb-2 md:mb-6">
           <div className="flex justify-between items-center mb-2">
             <div className="">
               <h1 className="text-2xl md:text-3xl font-bold text-gray-900">{currentBottle?.title || '하루마블'}</h1>
@@ -306,7 +307,7 @@ export default function AppPage() {
 
           {/* 할 일 입력 영역 */}
           <div className="relative" ref={colorPickerRef}>
-            <div className="flex items-center bg-white rounded-xl p-1.5 md:p-2 mt-3 md:mt-4 shadow-sm border border-gray-100">
+            <div className="flex items-center bg-white rounded-xl p-1.5 md:p-2 mt-1.5 md:mt-4 shadow-sm border border-gray-100">
               {/* 색상 선택 버튼 */}
               <div className="bg-gray-100 rounded-lg p-1 flex items-center justify-center">
                 <button
@@ -345,7 +346,7 @@ export default function AppPage() {
         </header>
 
         {/* --- 메인 유리병 --- */}
-        <main className="flex-1 flex flex-col items-center mb-4 relative min-h-0">
+        <main className="flex-1 flex flex-col items-center mb-1 relative min-h-0">
           <GlassJar>
             <PhysicsJar marbles={tasks} onPositionsSettled={handlePositionsSettled} onMarbleClick={handleMarbleClick} />
           </GlassJar>
@@ -364,7 +365,7 @@ export default function AppPage() {
                       "첫 번째 구슬의 설렘! 차근차근 담아봐요.";
 
             return (
-              <div className="w-[260px] md:w-[320px] mt-3 md:mt-4 z-10 bg-gray-100 rounded-xl p-3 md:p-4">
+              <div className="w-[260px] md:w-[320px] mt-1 md:mt-4 z-10 bg-gray-100 rounded-xl p-3 md:p-4">
                 <div className="flex justify-between items-center mb-1.5 md:mb-2">
                   <span className="text-xs font-medium text-gray-500">{count} / {MAX_MARBLES}</span>
                 </div>
@@ -383,6 +384,8 @@ export default function AppPage() {
           })()}
         </main>
 
+        {/* --- 광고 배너 영역 --- */}
+        <AdBanner className="mt-auto mb-1 rounded-xl border-none bg-blue-50/20" />
       </div>
 
       {/* --- 모달 1: 자주 하는 일 (Quick Actions) --- */}
