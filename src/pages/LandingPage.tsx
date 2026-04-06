@@ -4,6 +4,7 @@ import { Helmet } from 'react-helmet-async';
 import { authApi } from '@/api/auth';
 import { Plus } from 'lucide-react';
 import PhysicsJar from '../components/PhysicsJar';
+import GlassJar from '../components/GlassJar';
 import { MarbleFactory } from '../utils/MarbleFactory';
 
 export default function LandingPage() {
@@ -110,14 +111,9 @@ export default function LandingPage() {
           </div>
 
           {/* 미니 유리병 (AppPage와 동일 크기) */}
-          <div className="mx-auto w-[320px]">
-            <div className="mx-auto w-[260px] h-8 bg-gray-200 rounded-xl" />
-            <div className="rounded-b-[2rem] rounded-t-[50px] relative w-[320px] h-[400px] bg-white border-4 border-gray-200 shadow-lg overflow-hidden">
-              <div className="absolute inset-0 flex justify-center items-end px-1">
-                <PhysicsJar marbles={demoMarbles} />
-              </div>
-            </div>
-          </div>
+          <GlassJar className="mx-auto">
+            <PhysicsJar marbles={demoMarbles} />
+          </GlassJar>
 
           <p className="text-xs text-gray-400 mt-3">
             {demoMarbles.length > 0

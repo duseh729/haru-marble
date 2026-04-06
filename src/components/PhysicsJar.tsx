@@ -27,7 +27,7 @@ interface TooltipInfo {
   taskId: number;
 }
 
-export default function PhysicsJar({ marbles, marbleRadius = 22, onPositionsSettled, onMarbleClick }: PhysicsJarProps) {
+export default function PhysicsJar({ marbles, marbleRadius = 23, onPositionsSettled, onMarbleClick }: PhysicsJarProps) {
   const sceneRef = useRef<HTMLDivElement>(null);
   const engineRef = useRef<Matter.Engine | null>(null);
   const runnerRef = useRef<Matter.Runner | null>(null);
@@ -86,20 +86,26 @@ export default function PhysicsJar({ marbles, marbleRadius = 22, onPositionsSett
     });
     engineRef.current = engine;
 
-    const width = sceneRef.current.clientWidth;
-    const height = sceneRef.current.clientHeight;
+    const LOGICAL_WIDTH = 320;
+    const LOGICAL_HEIGHT = 400;
 
     const render = Render.create({
       element: sceneRef.current,
       engine: engine,
       options: {
-        width,
-        height,
+        width: LOGICAL_WIDTH,
+        height: LOGICAL_HEIGHT,
         wireframes: false,
         background: "transparent",
         pixelRatio: window.devicePixelRatio || 2,
       },
     });
+    
+    // 캔버스 크기를 부모 요소(GlassJar)에 맞게 유동적으로 조절
+    render.canvas.style.width = "100%";
+    render.canvas.style.height = "100%";
+    render.canvas.style.objectFit = "contain";
+    
     renderRef.current = render;
 
     const handleClick = (e: MouseEvent) => {
@@ -185,9 +191,9 @@ export default function PhysicsJar({ marbles, marbleRadius = 22, onPositionsSett
     });
 
     const wallOptions = { isStatic: true, render: { visible: false } };
-    const ground = Bodies.rectangle(width / 2, height + 10, width, 30, wallOptions);
-    const leftWall = Bodies.rectangle(-10, height / 2, 30, height, wallOptions);
-    const rightWall = Bodies.rectangle(width + 10, height / 2, 30, height, wallOptions);
+    const ground = Bodies.rectangle(LOGICAL_WIDTH / 2, LOGICAL_HEIGHT + 10, LOGICAL_WIDTH, 30, wallOptions);
+    const leftWall = Bodies.rectangle(-10, LOGICAL_HEIGHT / 2, 30, LOGICAL_HEIGHT, wallOptions);
+    const rightWall = Bodies.rectangle(LOGICAL_WIDTH + 10, LOGICAL_HEIGHT / 2, 30, LOGICAL_HEIGHT, wallOptions);
 
     World.add(engine.world, [ground, leftWall, rightWall]);
 

@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { Helmet } from "react-helmet-async";
 import PhysicsJar from "../components/PhysicsJar";
+import GlassJar from "../components/GlassJar";
 import { Button } from "@/components/ui/button";
 import { Plus, X, Star, Check, Trash2, CheckCheck, CalendarDays, Pencil, Settings } from "lucide-react";
 import { MARBLE_COLORS } from "../utils/MarbleFactory";
@@ -344,16 +345,9 @@ export default function AppPage() {
 
         {/* --- 메인 유리병 --- */}
         <main className="flex-1 flex flex-col items-center mb-4 relative min-h-0">
-          <div className="flex flex-col items-center flex-1 min-h-0 w-full max-w-[320px]">
-            {/* 뚜껑 */}
-            <div className="w-[81.25%] h-8 bg-gray-200 rounded-xl z-20 shrink-0"></div>
-            {/* 유리병 본체 - 남은 공간을 채우되 최대 400px */}
-            <div className="rounded-b-[2rem] rounded-t-[50px] relative w-full flex-1 max-h-[400px] bg-white border-4 border-gray-200 shadow-lg overflow-hidden z-10">
-              <div className="absolute inset-0 flex justify-center items-end px-1">
-                <PhysicsJar marbles={tasks} onPositionsSettled={handlePositionsSettled} onMarbleClick={handleMarbleClick} />
-              </div>
-            </div>
-          </div>
+          <GlassJar>
+            <PhysicsJar marbles={tasks} onPositionsSettled={handlePositionsSettled} onMarbleClick={handleMarbleClick} />
+          </GlassJar>
           <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[320px] h-[420px] bg-blue-100/50 rounded-full blur-3xl -z-10"></div>
 
           {/* --- 프로그레스 바 --- */}
