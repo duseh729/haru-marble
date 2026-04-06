@@ -251,27 +251,28 @@ export default function AppPage() {
 
       <div className="px-5 flex-1 flex flex-col">
         {/* --- 상단 헤더 --- */}
-        <header className="mb-6">
+        <header className="mb-4 md:mb-6">
           <div className="flex justify-between items-center mb-2">
             <div className="">
-              <h1 className="text-3xl font-bold text-gray-900">{currentBottle?.title || '하루마블'}</h1>
+              <h1 className="text-2xl md:text-3xl font-bold text-gray-900">{currentBottle?.title || '하루마블'}</h1>
             </div>
             <div className="flex gap-2">
               <Link to="/collection">
                 <Button
                   variant="outline"
-                  className="flex-1 h-12 rounded-xl border-2 hover:bg-gray-50 flex items-center justify-center">
+                  className="px-3 md:px-4 flex-1 h-10 md:h-12 rounded-xl border-2 hover:bg-gray-50 flex items-center justify-center">
                   <div className="w-4 h-4 flex items-center" >
                     <img src="/bottleIcon.png" alt="유리병" />
                   </div>
-                  <span className="font-bold text-gray-800">내 유리병</span>
+                  <span className="font-bold text-gray-800 hidden md:block ml-1">내 유리병</span>
+                  <span className="font-bold text-gray-800 md:hidden ml-1">유리병</span>
                 </Button>
               </Link>
               <Link to="/settings">
                 <Button
                   variant="outline"
                   size="icon"
-                  className="h-12 w-12 rounded-xl border-2 hover:bg-gray-50"
+                  className="h-10 w-10 md:h-12 md:w-12 rounded-xl border-2 hover:bg-gray-50"
                 >
                   <Settings className="w-5 h-5 text-gray-600" />
                 </Button>
@@ -284,33 +285,33 @@ export default function AppPage() {
             {/* 1. 자주 하는 일 버튼 (왼쪽, 넓게) */}
             <Button
               variant="outline"
-              className="flex-1 flex items-center justify-center h-12 rounded-xl border-2 hover:border-solid hover:bg-gray-50"
+              className="flex-1 flex items-center justify-center h-10 md:h-12 rounded-xl border-2 hover:border-solid hover:bg-gray-50"
               onClick={() => setIsQuickActionModalOpen(true)}
             >
-              <Star className="w-4 h-4 text-yellow-400" />
-              <span className="text-gray-600">자주 하는 일</span>
+              <Star className="w-4 md:w-5 h-4 md:h-5 text-yellow-400" />
+              <span className="text-gray-600 text-sm md:text-base">자주 하는 일</span>
             </Button>
 
             {/* 2. 오늘 한 일 기록 보기 버튼 (오른쪽, 아이콘) */}
             <Button
               variant="outline"
-              className="flex-1 h-12 rounded-xl border-2 hover:bg-gray-50 flex items-center justify-center"
+              className="flex-1 h-10 md:h-12 rounded-xl border-2 hover:bg-gray-50 flex items-center justify-center"
               onClick={() => setIsHistoryModalOpen(true)}
               title="오늘의 기록 보기"
             >
-              <CheckCheck className="w-5 h-5 text-green-400" />
-              <span className="text-gray-600">완료한 일</span>
+              <CheckCheck className="w-4 md:w-5 h-4 md:h-5 text-green-400" />
+              <span className="text-gray-600 text-sm md:text-base">완료한 일</span>
             </Button>
           </div>
 
           {/* 할 일 입력 영역 */}
           <div className="relative" ref={colorPickerRef}>
-            <div className="flex items-center bg-white rounded-xl p-2 mt-4 shadow-sm border border-gray-100">
+            <div className="flex items-center bg-white rounded-xl p-1.5 md:p-2 mt-3 md:mt-4 shadow-sm border border-gray-100">
               {/* 색상 선택 버튼 */}
               <div className="bg-gray-100 rounded-lg p-1 flex items-center justify-center">
                 <button
                   onClick={() => setShowColorPicker(!showColorPicker)}
-                  className="w-8 h-8 rounded-full border-2 border-white shadow-sm transition-transform"
+                  className="w-7 h-7 md:w-8 md:h-8 rounded-full border-2 border-white shadow-sm transition-transform"
                   style={{ backgroundColor: selectedColor || MARBLE_COLORS[0] }}
                   title="구슬 색상 선택"
                 />
@@ -321,13 +322,13 @@ export default function AppPage() {
                 onChange={(e) => setInput(e.target.value)}
                 onKeyDown={(e) => e.key === "Enter" && addTask(input)}
                 placeholder="완료한 일을 입력하세요."
-                className="flex-1 bg-transparent outline-none px-2 text-gray-700 placeholder-gray-400"
+                className="flex-1 bg-transparent outline-none px-2 text-sm md:text-base text-gray-700 placeholder-gray-400 min-w-0"
               />
               <button
                 onClick={() => addTask(input)}
-                className="bg-black text-white p-2 rounded-full hover:bg-blue-600 transition-colors"
+                className="shrink-0 bg-black text-white p-1.5 md:p-2 rounded-full hover:bg-blue-600 transition-colors"
               >
-                <Plus />
+                <Plus className="w-5 h-5" />
               </button>
             </div>
 
@@ -348,7 +349,7 @@ export default function AppPage() {
           <GlassJar>
             <PhysicsJar marbles={tasks} onPositionsSettled={handlePositionsSettled} onMarbleClick={handleMarbleClick} />
           </GlassJar>
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[320px] h-[420px] bg-blue-100/50 rounded-full blur-3xl -z-10"></div>
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[260px] md:w-[320px] h-[350px] md:h-[420px] bg-blue-100/50 rounded-full blur-3xl -z-10"></div>
 
           {/* --- 프로그레스 바 --- */}
           {(() => {
@@ -363,8 +364,8 @@ export default function AppPage() {
                       "첫 번째 구슬의 설렘! 차근차근 담아봐요.";
 
             return (
-              <div className="w-[320px] mt-4 z-10 bg-gray-100 rounded-xl p-4">
-                <div className="flex justify-between items-center mb-1.5">
+              <div className="w-[260px] md:w-[320px] mt-3 md:mt-4 z-10 bg-gray-100 rounded-xl p-3 md:p-4">
+                <div className="flex justify-between items-center mb-1.5 md:mb-2">
                   <span className="text-xs font-medium text-gray-500">{count} / {MAX_MARBLES}</span>
                 </div>
                 <div className="w-full h-4 bg-gray-200 rounded-full overflow-hidden">
