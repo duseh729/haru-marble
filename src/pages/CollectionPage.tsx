@@ -123,13 +123,12 @@ export default function CollectionPage() {
                                             {/* 뚜껑 */}
                                             <div className="w-[80%] h-2 bg-gray-200 rounded-lg" />
                                             {/* 유리병 카드 */}
-                                            <div className="w-full aspect-3/4 bg-gray-50 rounded-b-2xl rounded-t-xl border border-gray-100 flex flex-col items-center justify-end relative overflow-hidden">
+                                            <div className="w-full aspect-4/5 bg-gray-50 rounded-b-2xl rounded-t-xl border border-gray-100 flex flex-col items-center justify-end relative overflow-hidden">
                                                 {/* 구슬들 - 좌표 기반 배치 */}
                                                 {bottle.marbles.length > 0 ? (
                                                     bottle.marbles.some(m => m.position_x != null) ? (
-                                                        /* 좌표가 있으면 실제 위치 반영 (300x400 → 카드 크기로 스케일링) */
+                                                        /* 좌표가 있으면 실제 위치 반영 (320x400 → 카드 크기로 스케일링) */
                                                         bottle.marbles.map((marble) => {
-                                                            const scaledSize = 17;
                                                             return (
                                                                 <div
                                                                     key={marble.id}
@@ -137,9 +136,9 @@ export default function CollectionPage() {
                                                                     style={{
                                                                         background: `radial-gradient(circle at 35% 35%, rgba(255,255,255,0.7) 0%, rgba(255,255,255,0.2) 20%, ${marble.color || '#9CA3AF'} 20%, ${marble.color || '#9CA3AF'} 100%)`,
                                                                         border: '1px solid rgba(255,255,255,0.4)',
-                                                                        width: `${scaledSize}px`,
-                                                                        height: `${scaledSize}px`,
-                                                                        left: `${((marble.position_x ?? 150) / 300) * 100}%`,
+                                                                        width: "14.375%", // 46 / 320 (23px radius marble in 320px wide logic physics container)
+                                                                        aspectRatio: "1/1",
+                                                                        left: `${((marble.position_x ?? 160) / 320) * 100}%`,
                                                                         top: `${((marble.position_y ?? 200) / 400) * 100}%`,
                                                                         transform: "translate(-50%, -50%)",
                                                                     }}
@@ -152,12 +151,11 @@ export default function CollectionPage() {
                                                             {bottle.marbles.map((marble) => (
                                                                 <div
                                                                     key={marble.id}
-                                                                    className="rounded-full shadow-sm"
+                                                                    className="rounded-full shadow-sm ring-1 ring-white/40 ring-inset"
                                                                     style={{
                                                                         background: `radial-gradient(circle at 30% 30%, rgba(255,255,255,0.7) 0%, rgba(255,255,255,0.2) 20%, ${marble.color || '#9CA3AF'} 45%, ${marble.color || '#9CA3AF'} 100%)`,
-                                                                        border: '1px solid rgba(255,255,255,0.4)',
-                                                                        width: bottle.marbles.length > 12 ? "10px" : bottle.marbles.length > 6 ? "12px" : "16px",
-                                                                        height: bottle.marbles.length > 12 ? "10px" : bottle.marbles.length > 6 ? "12px" : "16px",
+                                                                        width: bottle.marbles.length > 12 ? "8px" : bottle.marbles.length > 6 ? "10px" : "12px",
+                                                                        height: bottle.marbles.length > 12 ? "8px" : bottle.marbles.length > 6 ? "10px" : "12px",
                                                                     }}
                                                                 />
                                                             ))}
@@ -185,7 +183,7 @@ export default function CollectionPage() {
                                     {/* 빈 칸 채우기 (3열 유지, 높이 일정) */}
                                     {Array.from({ length: 3 - row.length }).map((_, i) => (
                                         <div key={`empty-${i}`} className="flex flex-col items-center">
-                                            <div className="w-full aspect-3/4" />
+                                            <div className="w-full aspect-4/5" />
                                             <span className="mt-2 text-xs">&nbsp;</span>
                                             <span className="text-[10px]">&nbsp;</span>
                                         </div>
