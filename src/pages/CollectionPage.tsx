@@ -72,7 +72,7 @@ export default function CollectionPage() {
     };
 
     return (
-        <div className="w-full max-w-md mx-auto px-4 min-h-screen">
+        <div className="w-full max-w-md mx-auto px-4 min-h-full pb-6">
             <Helmet>
                 <title>내 컬렉션 - Done List</title>
             </Helmet>
@@ -109,11 +109,11 @@ export default function CollectionPage() {
             ) : (
                 <>
                     {/* 선반 그리드 */}
-                    <div className="space-y-6">
+                    <div className="space-y-2">
                         {rows.map((row, rowIndex) => (
                             <div key={rowIndex}>
                                 {/* 유리병 행 */}
-                                <div className="grid grid-cols-3 gap-3 pb-4">
+                                <div className="grid grid-cols-3 gap-3 pb-1">
                                     {row.map((bottle) => (
                                         <button
                                             key={bottle.id}
@@ -172,35 +172,36 @@ export default function CollectionPage() {
                                             </div>
 
                                             {/* 유리병 제목 */}
-                                            <span className="mt-2 text-xs font-medium text-gray-600 truncate w-full text-center">
-                                                {bottle.title}
-                                            </span>
-                                            <span className="text-[10px] text-gray-400">
-                                                {formatDate(bottle.created_at)}
-                                            </span>
+                                            <div className="mt-1 flex flex-col items-center leading-tight">
+                                                <span className="text-[11px] font-semibold text-gray-700 truncate w-full text-center">
+                                                    {bottle.title}
+                                                </span>
+                                                <span className="text-[9px] text-gray-400">
+                                                    {formatDate(bottle.created_at)}
+                                                </span>
+                                            </div>
                                         </button>
                                     ))}
                                     {/* 빈 칸 채우기 (3열 유지, 높이 일정) */}
                                     {Array.from({ length: 3 - row.length }).map((_, i) => (
                                         <div key={`empty-${i}`} className="flex flex-col items-center">
                                             <div className="w-full aspect-4/5" />
-                                            <span className="mt-2 text-xs">&nbsp;</span>
-                                            <span className="text-[10px]">&nbsp;</span>
+                                            <div className="mt-1 h-[26px]" />
                                         </div>
                                     ))}
                                 </div>
 
                                 {/* 선반 구분선 */}
-                                <div className="relative mx-[-8px]">
-                                    <div className="h-[6px] bg-linear-to-b from-gray-200 to-gray-100 rounded-full" />
-                                    <div className="h-[2px] bg-gray-200/50 mt-px rounded-full" />
+                                <div className="relative mx-[-4px]">
+                                    <div className="h-[4px] bg-linear-to-b from-gray-200 to-gray-100 rounded-full" />
+                                    <div className="h-px bg-gray-200/50 mt-px rounded-full" />
                                 </div>
                             </div>
                         ))}
                     </div>
 
                     {/* 페이지네이션 - 1 / 3 형식 */}
-                    <div className="flex items-center justify-center gap-4 mt-8">
+                    <div className="flex items-center justify-center gap-4 mt-4">
                         <button
                             onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
                             disabled={currentPage === 1}
