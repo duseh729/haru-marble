@@ -254,8 +254,12 @@ export default function AppPage() {
         {/* --- 상단 헤더 --- */}
         <header className="mb-2 md:mb-6">
           <div className="flex justify-between items-center mb-2">
-            <div className="">
-              <h1 className="text-2xl md:text-3xl font-bold text-gray-900">{currentBottle?.title || '하루마블'}</h1>
+            <div className="min-h-[2rem] md:min-h-[2.5rem] flex items-center">
+              {currentBottle ? (
+                <h1 className="text-2xl md:text-3xl font-bold text-gray-900">{currentBottle.title}</h1>
+              ) : (
+                <div className="h-8 w-32 bg-gray-100 animate-pulse rounded-lg" />
+              )}
             </div>
             <div className="flex gap-2">
               <Link to="/collection">
