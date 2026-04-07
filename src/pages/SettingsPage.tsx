@@ -42,12 +42,12 @@ export default function SettingsPage() {
             <div className="px-5 py-6 flex-1 flex flex-col">
                 {/* 헤더 */}
                 <header className="mb-8">
-                    <div className="flex items-center gap-3">
+                    <div className="flex items-center">
                         <button
                             onClick={() => navigate(-1)}
-                            className="p-2 rounded-xl hover:bg-gray-100 transition-colors"
+                            className="rounded-xl hover:bg-gray-100 transition-colors gap-1"
                         >
-                            <ChevronLeft className="w-6 h-6 text-gray-700" />
+                            <ChevronLeft className="w-7 h-7 text-gray-700" />
                         </button>
                         <h1 className="text-2xl font-bold text-gray-900">설정</h1>
                     </div>
