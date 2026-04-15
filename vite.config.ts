@@ -19,4 +19,7 @@ export default defineConfig({
       clientPort: 443, // ngrok HTTPS 터널 사용 시 HMR이 끊기지 않도록 설정
     },
   },
+  build: {
+    sourcemap: false, // 프로덕션 빌드에서 소스맵 생성 중단 (보안 취약점 조치)
+  },
 });

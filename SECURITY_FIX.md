@@ -25,6 +25,12 @@
 **적용 헤더:**
 `Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline' ...`
 
+### 3) 소스맵(Source Map) 비활성화
+프로덕션 빌드 시 원본 코드와 경로가 노출되는 것을 방지하기 위해 소스맵 생성을 완전히 비활성화하였습니다.
+
+**적용 사항:**
+- `vite.config.ts` 설정에 `build: { sourcemap: false }` 추가
+
 ### Vercel 설정 적용 (`vercel.json`)
 프론트엔드 배포 환경인 Vercel의 설정 파일에 보안 헤더들을 일괄 추가하였습니다.
 
