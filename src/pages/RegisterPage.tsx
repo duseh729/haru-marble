@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import { authApi } from '../api/auth';
 import { Button } from '@/components/ui/button';
 import { Helmet } from 'react-helmet-async';
@@ -36,6 +36,13 @@ export default function RegisterPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [emailSent, setEmailSent] = useState(false);
   const [resendCooldown, setResendCooldown] = useState(0);
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    authApi.isAuthenticated().then(ok => {
+      if (ok) navigate('/app');
+    });
+  }, [navigate]);
 
   const strength = getPasswordStrength(password);
   const strengthInfo = strengthConfig[strength];

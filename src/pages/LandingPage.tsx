@@ -1,14 +1,21 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import { Plus } from 'lucide-react';
 import PhysicsJar from '../components/PhysicsJar';
 import GlassJar from '../components/GlassJar';
 import { MarbleFactory } from '../utils/MarbleFactory';
+import { authApi } from '../api/auth';
 
 export default function LandingPage() {
   const navigate = useNavigate();
   const demoRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    authApi.isAuthenticated().then(ok => {
+      if (ok) navigate('/app');
+    });
+  }, [navigate]);
 
   // --- 데모 상태 (서버 연동 없음, UI 전용) ---
   const [demoMarbles, setDemoMarbles] = useState<{ id: number; text: string; color?: string }[]>([]);

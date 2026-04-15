@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { authApi } from '../api/auth';
 import { socialApi } from '../api/social';
@@ -22,6 +22,12 @@ export default function LoginPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [isRateLimited, setIsRateLimited] = useState(false);
   const navigate = useNavigate();
+
+  useEffect(() => {
+    authApi.isAuthenticated().then(ok => {
+      if (ok) navigate('/app');
+    });
+  }, [navigate]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
