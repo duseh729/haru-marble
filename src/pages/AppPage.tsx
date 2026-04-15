@@ -12,6 +12,7 @@ import { AlertDialog } from "../components/ui/AlertDialog";
 import { tasksApi, bottlesApi, frequentTasksApi } from "../api/tasks";
 import type { Bottle } from "../api/tasks";
 import { Link } from "react-router-dom";
+import { supabase } from "@/lib/supabase";
 
 // 태스크 타입 정의
 interface Task {
@@ -78,30 +79,38 @@ export default function AppPage() {
 
   const initializeApp = async () => {
     try {
-      // 1. URL에서 bottle ID 확인
+      // 1. URL 파라미터 확인
       const params = new URLSearchParams(window.location.search);
       const bottleIdFromUrl = params.get("bottle");
 
-      // 2. 유리병 목록 가져오기
+      // 2. Supabase user_metadata에서 마지막으로 본 유리병 ID 확인
+      const { data: { user } } = await supabase.auth.getUser();
+      const lastBottleId = user?.user_metadata?.last_bottle_id as number | undefined;
+
+      // 3. 유리병 목록 가져오기
       const bottles = await bottlesApi.getBottles();
 
       let bottle: Bottle;
       if (bottles && bottles.length > 0) {
         if (bottleIdFromUrl) {
-          // URL에 bottle ID가 있으면 해당 병 사용
           bottle = bottles.find(b => b.id === Number(bottleIdFromUrl)) || bottles[0];
+        } else if (lastBottleId) {
+          // 마지막으로 본 유리병 복원 (기기/플랫폼 동기화)
+          bottle = bottles.find(b => b.id === Number(lastBottleId)) || bottles.find(b => b.is_pinned) || bottles[0];
         } else {
-          // 없으면 pinned 또는 첫 번째 사용
           bottle = bottles.find(b => b.is_pinned) || bottles[0];
         }
       } else {
-        // 없으면 기본 유리병 생성
         bottle = await bottlesApi.createBottle("기본 유리병", "내 첫 번째 유리병");
       }
 
       setCurrentBottle(bottle);
 
-      // 2. 해당 병의 구슬들 로드
+      // 4. 마지막 유리병 ID를 user_metadata에 저장 (로그아웃 전 완료 보장)
+      const { error: metaError } = await supabase.auth.updateUser({ data: { last_bottle_id: bottle.id } });
+      if (metaError) console.error("[last_bottle] 저장 실패:", metaError.message);
+
+      // 5. 해당 병의 구슬들 로드
       await loadTasks(bottle.id);
     } catch (error) {
       console.error("Failed to initialize app:", error);
