@@ -233,7 +233,18 @@ export default function PhysicsJar({ marbles, marbleRadius = 23, onPositionsSett
     // 기존 구슬의 task 데이터도 최신으로 갱신 (수정 반영)
     marbleMapRef.current.forEach((oldTask, body) => {
       const updated = marbles.find(m => m.id === oldTask.id);
-      if (updated) marbleMapRef.current.set(body, updated);
+      if (updated) {
+        marbleMapRef.current.set(body, updated);
+        // 디자인 변경 (색상) 실시간 반영
+        if (updated.color) {
+          if ((body as any).plugin) {
+            (body as any).plugin.marbleColor = updated.color;
+          }
+          if (body.render) {
+            body.render.fillStyle = updated.color;
+          }
+        }
+      }
     });
   }, [marbles]);
 

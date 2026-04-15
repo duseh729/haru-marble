@@ -253,7 +253,7 @@ export default function AppPage() {
       <div className="px-5 flex-1 flex flex-col">
         {/* --- 상단 헤더 --- */}
         <header className="mb-2 md:mb-6">
-          <div className="flex justify-between items-center mb-2">
+          <div className="flex justify-between items-center">
             <div className="min-h-[2rem] md:min-h-[2.5rem] flex items-center">
               {currentBottle ? (
                 <h1 className="text-2xl md:text-3xl font-bold text-gray-900">{currentBottle.title}</h1>
