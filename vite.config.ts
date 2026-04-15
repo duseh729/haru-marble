@@ -21,5 +21,17 @@ export default defineConfig({
   },
   build: {
     sourcemap: false, // 프로덕션 빌드에서 소스맵 생성 중단 (보안 취약점 조치)
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          // 물리 엔진 (Matter.js) - AppPage에서만 사용
+          'matter': ['matter-js'],
+          // React 코어 - 모든 페이지 공통
+          'react-vendor': ['react', 'react-dom', 'react-router-dom'],
+          // Supabase - API 통신
+          'supabase': ['@supabase/supabase-js'],
+        },
+      },
+    },
   },
 });

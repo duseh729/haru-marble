@@ -4,7 +4,7 @@ import PhysicsJar from "../components/PhysicsJar";
 import GlassJar from "../components/GlassJar";
 import AdBanner from "../components/AdBanner";
 import { Button } from "@/components/ui/button";
-import { Plus, X, Star, Check, Trash2, CheckCheck, CalendarDays, Pencil, Settings, AlertCircle } from "lucide-react";
+import { Plus, X, Star, Check, Trash2, CheckCheck, Pencil, Settings, AlertCircle } from "lucide-react";
 import { MARBLE_COLORS } from "../utils/MarbleFactory";
 import ColorPalette from "../components/ColorPickerDropdown";
 import { AlertDialog } from "../components/ui/AlertDialog";
@@ -389,18 +389,18 @@ export default function AppPage() {
               )}
             </div>
             <div className="flex gap-2">
-              <Link to="/collection">
+              <Link to="/collection" aria-label="내 유리병 목록 보기">
                 <Button
                   variant="outline"
                   className="px-3 md:px-4 flex-1 h-10 md:h-12 rounded-xl border-2 hover:bg-gray-50 flex items-center justify-center">
                   <div className="w-4 h-4 flex items-center" >
-                    <img src="/bottleIcon.png" alt="유리병" />
+                    <img src="/bottleIcon.png" alt="유리병 아이콘" width="16" height="16" />
                   </div>
                   <span className="font-bold text-gray-800 hidden md:block ml-1">내 유리병</span>
                   <span className="font-bold text-gray-800 md:hidden ml-1">내 유리병</span>
                 </Button>
               </Link>
-              <Link to="/settings">
+              <Link to="/settings" aria-label="설정 페이지로 이동">
                 <Button
                   variant="outline"
                   size="icon"
@@ -446,6 +446,7 @@ export default function AppPage() {
                   className="w-7 h-7 md:w-8 md:h-8 rounded-full border-2 border-white shadow-sm transition-transform"
                   style={{ backgroundColor: selectedColor || MARBLE_COLORS[0] }}
                   title="구슬 색상 선택"
+                  aria-label="구슬 색상 선택"
                 />
               </div>
               <div className="flex-1 min-w-0 relative flex items-center">
