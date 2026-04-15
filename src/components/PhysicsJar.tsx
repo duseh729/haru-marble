@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState, useCallback } from "react";
 import Matter from "matter-js";
 import { MarbleFactory } from "../utils/MarbleFactory";
-import { Pencil } from "lucide-react";
+import { CheckCheck } from "lucide-react";
 
 // DB에서 가져온 Task 타입
 interface Task {
@@ -318,7 +318,7 @@ export default function PhysicsJar({ marbles, marbleRadius = 23, onPositionsSett
           }}
         >
           {tooltip.text}
-          <Pencil size={11} style={{ opacity: 0.7, flexShrink: 0 }} />
+          <CheckCheck size={11} style={{ opacity: 0.7, color: "#4ade80", flexShrink: 0 }} />
         </span>
       </div>
     );

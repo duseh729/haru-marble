@@ -302,7 +302,7 @@ export default function AppPage() {
               variant="outline"
               className="flex-1 h-10 md:h-12 rounded-xl border-2 hover:bg-gray-50 flex items-center justify-center"
               onClick={() => setIsHistoryModalOpen(true)}
-              title="오늘의 기록 보기"
+              title="완료한 일 보기"
             >
               <CheckCheck className="w-4 md:w-5 h-4 md:h-5 text-green-400" />
               <span className="text-gray-600 text-sm md:text-base">완료한 일</span>
@@ -479,8 +479,8 @@ export default function AppPage() {
           >
             <div className="flex justify-between items-center mb-6">
               <div className="flex items-center space-x-2">
-                <CalendarDays className="w-6 h-6 text-blue-500" />
-                <h3 className="text-xl font-bold text-gray-900">오늘의 기록</h3>
+                <CheckCheck className="w-6 h-6 text-green-500" />
+                <h3 className="text-xl font-bold text-gray-900">완료한 일</h3>
               </div>
               <Button variant="ghost" size="icon" onClick={() => setIsHistoryModalOpen(false)} className="h-8 w-8 rounded-full">
                 <X className="w-5 h-5" />
