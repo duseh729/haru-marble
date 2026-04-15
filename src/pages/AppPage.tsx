@@ -4,9 +4,10 @@ import PhysicsJar from "../components/PhysicsJar";
 import GlassJar from "../components/GlassJar";
 import AdBanner from "../components/AdBanner";
 import { Button } from "@/components/ui/button";
-import { Plus, X, Star, Check, Trash2, CheckCheck, CalendarDays, Pencil, Settings } from "lucide-react";
+import { Plus, X, Star, Check, Trash2, CheckCheck, CalendarDays, Pencil, Settings, AlertCircle } from "lucide-react";
 import { MARBLE_COLORS } from "../utils/MarbleFactory";
 import ColorPalette from "../components/ColorPickerDropdown";
+import { AlertDialog } from "../components/ui/AlertDialog";
 
 import { tasksApi, bottlesApi, frequentTasksApi } from "../api/tasks";
 import type { Bottle } from "../api/tasks";
@@ -35,7 +36,26 @@ export default function AppPage() {
   const [_isLoading, setIsLoading] = useState(true);
   const [selectedColor, setSelectedColor] = useState<string>(MARBLE_COLORS[0]);
   const [showColorPicker, setShowColorPicker] = useState(false);
+  const [isEditingTitle, setIsEditingTitle] = useState(false);
+  const [newTitle, setNewTitle] = useState("");
   const colorPickerRef = useRef<HTMLDivElement>(null);
+
+  const [alertState, setAlertState] = useState<{
+    isOpen: boolean;
+    title: string;
+    description?: React.ReactNode;
+    icon?: React.ReactNode;
+    confirmVariant?: "default" | "destructive";
+    onConfirm?: () => void;
+    showCancel?: boolean;
+  }>({ isOpen: false, title: "" });
+
+  const showAlert = (config: Omit<typeof alertState, 'isOpen'>) => {
+    setAlertState({ ...config, isOpen: true });
+  };
+  const closeAlert = () => {
+    setAlertState(prev => ({ ...prev, isOpen: false }));
+  };
 
   // 색상 피커 외부 클릭 시 닫기
   useEffect(() => {
@@ -103,7 +123,6 @@ export default function AppPage() {
   // --- 모달 상태 관리 ---
   const [isQuickActionModalOpen, setIsQuickActionModalOpen] = useState(false);
   const [isHistoryModalOpen, setIsHistoryModalOpen] = useState(false);
-  const [isBottleFullModalOpen, setIsBottleFullModalOpen] = useState(false);
   const [scrollToTaskId, setScrollToTaskId] = useState<number | null>(null);
 
   // 퀵 액션 관련 상태
@@ -133,7 +152,11 @@ export default function AppPage() {
     if (!taskText || !currentBottle) return;
 
     if (tasks.length >= 60) {
-      setIsBottleFullModalOpen(true);
+      showAlert({
+        title: "유리병이 가득 찼어요!",
+        description: "새 유리병을 만들어 더 많은 성취를 담아보세요.",
+        icon: <div className="text-5xl mb-2">✨</div>
+      });
       return;
     }
 
@@ -144,7 +167,11 @@ export default function AppPage() {
       setTasks((prev) => [...prev, newTask]);
       setInput("");
     } catch (error) {
-      alert("할 일을 저장하지 못했습니다. (하루 10개 제한일 수 있습니다)");
+      showAlert({
+        title: "오류",
+        description: "할 일을 저장하지 못했습니다. (하루 10개 제한일 수 있습니다)",
+        icon: <AlertCircle className="w-7 h-7 text-red-500" />
+      });
       console.error(error);
     }
   };
@@ -189,22 +216,24 @@ export default function AppPage() {
 
   // --- 구슬 수정/삭제 로직 ---
   const [editingTask, setEditingTask] = useState<{ id: number; text: string; color: string } | null>(null);
-  const [deleteTargetId, setDeleteTargetId] = useState<number | null>(null);
 
   const handleDeleteTask = (taskId: number) => {
-    setDeleteTargetId(taskId);
-  };
-
-  const confirmDelete = async () => {
-    if (deleteTargetId === null) return;
-    try {
-      await tasksApi.deleteTask(deleteTargetId);
-      setTasks(prev => prev.filter(t => t.id !== deleteTargetId));
-    } catch (error) {
-      console.error("Failed to delete task:", error);
-    } finally {
-      setDeleteTargetId(null);
-    }
+    showAlert({
+      title: "구슬 삭제",
+      description: "이 구슬을 정말 삭제할까요?\n삭제하면 되돌릴 수 없어요.",
+      icon: <div className="w-12 h-12 rounded-full bg-red-50 flex items-center justify-center"><Trash2 className="w-6 h-6 text-red-500" /></div>,
+      confirmVariant: "destructive",
+      showCancel: true,
+      onConfirm: async () => {
+        closeAlert();
+        try {
+          await tasksApi.deleteTask(taskId);
+          setTasks(prev => prev.filter(t => t.id !== taskId));
+        } catch (error) {
+          console.error("Failed to delete task:", error);
+        }
+      }
+    });
   };
 
   const handleUpdateTask = async (taskId: number, newText: string, newColor?: string) => {
@@ -222,7 +251,44 @@ export default function AppPage() {
       setEditingTask(null);
     } catch (error) {
       console.error("Failed to update task:", error);
-      alert("수정에 실패했습니다.");
+      showAlert({
+        title: "오류",
+        description: "수정에 실패했습니다.",
+        icon: <AlertCircle className="w-7 h-7 text-red-500" />
+      });
+    }
+  };
+
+  const handleUpdateBottleTitle = async () => {
+    if (!currentBottle) return;
+
+    const trimmedTitle = newTitle.trim();
+
+    if (!trimmedTitle) {
+      showAlert({
+        title: "알림",
+        description: "유리병 이름을 공백으로 설정할 수 없습니다.",
+        icon: <AlertCircle className="w-7 h-7 text-blue-500" />
+      });
+      return;
+    }
+
+    if (trimmedTitle === currentBottle.title) {
+      setIsEditingTitle(false);
+      return;
+    }
+
+    try {
+      const updated = await bottlesApi.updateBottleTitle(currentBottle.id, trimmedTitle);
+      setCurrentBottle(updated);
+      setIsEditingTitle(false);
+    } catch (error) {
+      console.error("Failed to update bottle title:", error);
+      showAlert({
+        title: "오류",
+        description: "유리병 이름 수정에 실패했습니다.",
+        icon: <AlertCircle className="w-7 h-7 text-red-500" />
+      });
     }
   };
 
@@ -254,9 +320,54 @@ export default function AppPage() {
         {/* --- 상단 헤더 --- */}
         <header className="mb-2 md:mb-6">
           <div className="flex justify-between items-center">
-            <div className="min-h-[2rem] md:min-h-[2.5rem] flex items-center">
+            <div className="min-h-[2rem] md:min-h-[2.5rem] flex items-center group min-w-0 flex-1 mr-4">
               {currentBottle ? (
-                <h1 className="text-2xl md:text-3xl font-bold text-gray-900">{currentBottle.title}</h1>
+                isEditingTitle ? (
+                  <div className="flex items-center gap-2 w-full">
+                    <input
+                      type="text"
+                      className="text-2xl md:text-3xl font-bold text-gray-900 bg-transparent border-b-2 border-blue-500 outline-none w-full max-w-[200px] md:max-w-[400px]"
+                      value={newTitle}
+                      onChange={(e) => setNewTitle(e.target.value)}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter") handleUpdateBottleTitle();
+                        if (e.key === "Escape") setIsEditingTitle(false);
+                      }}
+                      autoFocus
+                    />
+                    <div className="flex shrink-0">
+                      <button onClick={handleUpdateBottleTitle} className="p-1 text-blue-500 hover:text-blue-700">
+                        <Check className="w-5 h-5 md:w-6 md:h-6" />
+                      </button>
+                      <button onClick={() => setIsEditingTitle(false)} className="p-1 text-gray-400 hover:text-gray-600">
+                        <X className="w-5 h-5 md:w-6 md:h-6" />
+                      </button>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="flex items-center gap-1.5 min-w-0">
+                    <h1 
+                      className="text-2xl md:text-3xl font-bold text-gray-900 truncate cursor-pointer hover:text-gray-700 transition-colors"
+                      style={{ maxWidth: 'calc(100vw - 180px)' }} // 오른쪽 버튼 그룹 공간 확보
+                      onClick={() => {
+                        setIsEditingTitle(true);
+                        setNewTitle(currentBottle.title);
+                      }}
+                    >
+                      {currentBottle.title}
+                    </h1>
+                    <button 
+                      onClick={() => {
+                        setIsEditingTitle(true);
+                        setNewTitle(currentBottle.title);
+                      }}
+                      className="shrink-0 p-1.5 hover:bg-gray-100 rounded-xl transition-colors"
+                      title="이름 수정"
+                    >
+                      <Pencil className="w-4 h-4 md:w-5 md:h-5 text-gray-400" />
+                    </button>
+                  </div>
+                )
               ) : (
                 <div className="h-8 w-32 bg-gray-100 animate-pulse rounded-lg" />
               )}
@@ -597,53 +708,18 @@ export default function AppPage() {
           </div>
         </div>
       )}
-      {/* --- 삭제 확인 모달 --- */}
-      {deleteTargetId !== null && (
-        <div className="fixed inset-0 z-60 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4 animate-in fade-in duration-200">
-          <div className="bg-white w-full max-w-[280px] rounded-3xl p-6 shadow-2xl animate-in zoom-in-95 duration-200 text-center">
-            <div className="w-12 h-12 mx-auto mb-4 rounded-full bg-red-100 flex items-center justify-center">
-              <Trash2 className="w-6 h-6 text-red-500" />
-            </div>
-            <h3 className="text-lg font-bold text-gray-900 mb-1">구슬 삭제</h3>
-            <p className="text-sm text-gray-500 mb-6">이 구슬을 정말 삭제할까요?<br />삭제하면 되돌릴 수 없어요.</p>
-            <div className="flex gap-3">
-              <Button
-                variant="outline"
-                className="flex-1 h-12 rounded-xl font-medium"
-                onClick={() => setDeleteTargetId(null)}
-              >
-                취소
-              </Button>
-              <Button
-                className="flex-1 h-12 rounded-xl font-medium bg-red-500 hover:bg-red-600 text-white"
-                onClick={confirmDelete}
-              >
-                삭제
-              </Button>
-            </div>
-          </div>
-        </div>
-      )}
 
-      {/* --- 모달: 유리병 가득 참 알림 --- */}
-      {isBottleFullModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4 animate-in fade-in duration-200">
-          <div
-            className="bg-white w-full max-w-[280px] rounded-3xl p-6 shadow-2xl animate-in zoom-in-95 duration-200 text-center"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="text-5xl mb-3">✨</div>
-            <h3 className="text-lg font-bold text-gray-900 mb-2">유리병이 가득 찼어요!</h3>
-            <p className="text-sm text-gray-500 mb-5">새 유리병을 만들어 더 많은 성취를 담아보세요.</p>
-            <Button
-              className="w-full h-11 rounded-xl font-medium bg-blue-500 hover:bg-blue-600 text-white"
-              onClick={() => setIsBottleFullModalOpen(false)}
-            >
-              확인
-            </Button>
-          </div>
-        </div>
-      )}
+      {/* --- 공통 적용된 Alert 모달 --- */}
+      <AlertDialog
+        isOpen={alertState.isOpen}
+        onClose={closeAlert}
+        title={alertState.title}
+        description={alertState.description}
+        icon={alertState.icon}
+        confirmVariant={alertState.confirmVariant}
+        onConfirm={alertState.onConfirm}
+        showCancel={alertState.showCancel}
+      />
     </div>
   );
 }
