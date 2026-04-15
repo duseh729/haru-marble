@@ -323,18 +323,34 @@ export default function AppPage() {
             <div className="min-h-[2rem] md:min-h-[2.5rem] flex items-center group min-w-0 flex-1 mr-4">
               {currentBottle ? (
                 isEditingTitle ? (
-                  <div className="flex items-center gap-2 w-full">
-                    <input
-                      type="text"
-                      className="text-2xl md:text-3xl font-bold text-gray-900 bg-transparent border-b-2 border-blue-500 outline-none w-full max-w-[200px] md:max-w-[400px]"
-                      value={newTitle}
-                      onChange={(e) => setNewTitle(e.target.value)}
-                      onKeyDown={(e) => {
-                        if (e.key === "Enter") handleUpdateBottleTitle();
-                        if (e.key === "Escape") setIsEditingTitle(false);
-                      }}
-                      autoFocus
-                    />
+                  <div className="flex items-center gap-2 w-full relative">
+                    <div className="relative flex-1 min-w-0">
+                      <input
+                        type="text"
+                        maxLength={64}
+                        className={`text-2xl md:text-3xl font-bold text-gray-900 bg-transparent border-b-2 outline-none w-full transition-colors ${newTitle.length >= 64 ? "border-red-500" : "border-blue-500"
+                          }`}
+                        value={newTitle}
+                        onChange={(e) => {
+                          if (e.target.value.length <= 64) {
+                            setNewTitle(e.target.value);
+                          } else {
+                            setNewTitle(e.target.value.slice(0, 64));
+                          }
+                        }}
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter") handleUpdateBottleTitle();
+                          if (e.key === "Escape") setIsEditingTitle(false);
+                        }}
+                        autoFocus
+                      />
+                      {newTitle.length > 50 && (
+                        <span className={`absolute -top-3 right-0 text-[10px] font-medium ${newTitle.length >= 64 ? "text-red-500" : "text-gray-400"
+                          }`}>
+                          {newTitle.length}/64
+                        </span>
+                      )}
+                    </div>
                     <div className="flex shrink-0">
                       <button onClick={handleUpdateBottleTitle} className="p-1 text-blue-500 hover:text-blue-700">
                         <Check className="w-5 h-5 md:w-6 md:h-6" />
@@ -346,7 +362,7 @@ export default function AppPage() {
                   </div>
                 ) : (
                   <div className="flex items-center gap-1.5 min-w-0">
-                    <h1 
+                    <h1
                       className="text-2xl md:text-3xl font-bold text-gray-900 truncate cursor-pointer hover:text-gray-700 transition-colors"
                       style={{ maxWidth: 'calc(100vw - 180px)' }} // 오른쪽 버튼 그룹 공간 확보
                       onClick={() => {
@@ -356,7 +372,7 @@ export default function AppPage() {
                     >
                       {currentBottle.title}
                     </h1>
-                    <button 
+                    <button
                       onClick={() => {
                         setIsEditingTitle(true);
                         setNewTitle(currentBottle.title);
@@ -381,7 +397,7 @@ export default function AppPage() {
                     <img src="/bottleIcon.png" alt="유리병" />
                   </div>
                   <span className="font-bold text-gray-800 hidden md:block ml-1">내 유리병</span>
-                  <span className="font-bold text-gray-800 md:hidden ml-1">유리병</span>
+                  <span className="font-bold text-gray-800 md:hidden ml-1">내 유리병</span>
                 </Button>
               </Link>
               <Link to="/settings">
@@ -432,17 +448,33 @@ export default function AppPage() {
                   title="구슬 색상 선택"
                 />
               </div>
-              <input
-                type="text"
-                value={input}
-                onChange={(e) => setInput(e.target.value)}
-                onKeyDown={(e) => e.key === "Enter" && addTask(input)}
-                placeholder="완료한 일을 입력하세요."
-                className="flex-1 bg-transparent outline-none px-2 text-sm md:text-base text-gray-700 placeholder-gray-400 min-w-0"
-              />
+              <div className="flex-1 min-w-0 relative flex items-center">
+                <input
+                  type="text"
+                  maxLength={128}
+                  value={input}
+                  onChange={(e) => {
+                    if (e.target.value.length <= 128) {
+                      setInput(e.target.value);
+                    } else {
+                      setInput(e.target.value.slice(0, 128));
+                    }
+                  }}
+                  onKeyDown={(e) => e.key === "Enter" && addTask(input)}
+                  placeholder="완료한 일을 입력하세요."
+                  className="w-full bg-transparent outline-none px-2 text-sm md:text-base text-gray-700 placeholder-gray-400 min-w-0"
+                />
+                {input.length > 100 && (
+                  <span className={`absolute -top-4 right-2 text-[10px] font-medium ${input.length >= 128 ? "text-red-500" : "text-gray-400"
+                    }`}>
+                    {input.length}/128
+                  </span>
+                )}
+              </div>
               <button
                 onClick={() => addTask(input)}
                 className="shrink-0 bg-black text-white p-1.5 md:p-2 rounded-full hover:bg-blue-600 transition-colors"
+                disabled={!input.trim()}
               >
                 <Plus className="w-5 h-5" />
               </button>
@@ -480,7 +512,7 @@ export default function AppPage() {
                       "첫 번째 구슬의 설렘! 차근차근 담아봐요.";
 
             return (
-              <div className="w-[260px] md:w-[320px] mt-1 md:mt-4 z-10 bg-gray-100 rounded-xl p-3 md:p-4">
+              <div className="w-[260px] md:w-[320px] mt-4 md:mt-4 z-10 bg-gray-100 rounded-xl p-3 md:p-4">
                 <div className="flex justify-between items-center mb-1.5 md:mb-2">
                   <span className="text-xs font-medium text-gray-500">{count} / {MAX_MARBLES}</span>
                 </div>
@@ -654,22 +686,38 @@ export default function AppPage() {
                       )}
                       <div className="flex-1 min-w-0">
                         {editingTask?.id === task.id ? (
-                          <div className="flex items-center gap-2">
-                            <input
-                              type="text"
-                              value={editingTask.text}
-                              onChange={(e) => setEditingTask({ ...editingTask, text: e.target.value })}
-                              onKeyDown={(e) => {
-                                if (e.key === 'Enter') handleUpdateTask(task.id, editingTask.text, editingTask.color);
-                                if (e.key === 'Escape') setEditingTask(null);
-                              }}
-                              className="flex-1 min-w-0 px-2 py-1 text-sm border border-blue-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                              autoFocus
-                            />
-                            <button onClick={() => handleUpdateTask(task.id, editingTask.text, editingTask.color)} className="text-blue-500 hover:text-blue-700">
+                          <div className="flex items-center gap-2 flex-1 min-w-0">
+                            <div className="flex-1 min-w-0 relative">
+                              <input
+                                type="text"
+                                maxLength={128}
+                                value={editingTask.text}
+                                onChange={(e) => {
+                                  const val = e.target.value;
+                                  setEditingTask({
+                                    ...editingTask,
+                                    text: val.length <= 128 ? val : val.slice(0, 128)
+                                  });
+                                }}
+                                onKeyDown={(e) => {
+                                  if (e.key === 'Enter') handleUpdateTask(task.id, editingTask.text, editingTask.color);
+                                  if (e.key === 'Escape') setEditingTask(null);
+                                }}
+                                className={`w-full px-2 py-1 text-sm border rounded-lg focus:outline-none focus:ring-2 ${editingTask.text.length >= 128 ? "border-red-300 focus:ring-red-400" : "border-blue-300 focus:ring-blue-500"
+                                  }`}
+                                autoFocus
+                              />
+                              {editingTask.text.length > 100 && (
+                                <span className={`absolute -top-4 right-0 text-[9px] font-medium ${editingTask.text.length >= 128 ? "text-red-500" : "text-gray-400"
+                                  }`}>
+                                  {editingTask.text.length}/128
+                                </span>
+                              )}
+                            </div>
+                            <button onClick={() => handleUpdateTask(task.id, editingTask.text, editingTask.color)} className="text-blue-500 hover:text-blue-700 shrink-0">
                               <Check className="w-4 h-4" />
                             </button>
-                            <button onClick={() => setEditingTask(null)} className="text-gray-400 hover:text-gray-600">
+                            <button onClick={() => setEditingTask(null)} className="text-gray-400 hover:text-gray-600 shrink-0">
                               <X className="w-4 h-4" />
                             </button>
                           </div>
