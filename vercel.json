@@ -9,7 +9,7 @@
         },
         {
           "key": "Content-Security-Policy",
-          "value": "default-src 'self'; script-src 'self' 'unsafe-inline' https://www.googletagmanager.com; style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; img-src 'self' data: https://oawgqxptwuoqkbksjcqv.supabase.co https://www.google-analytics.com https://www.googletagmanager.com; connect-src 'self' https://oawgqxptwuoqkbksjcqv.supabase.co wss://oawgqxptwuoqkbksjcqv.supabase.co https://www.google-analytics.com https://www.googletagmanager.com https://cdn.jsdelivr.net https://*.api.emailjs.com; font-src 'self' https://cdn.jsdelivr.net; object-src 'none'; base-uri 'self';"
+          "value": "default-src 'self'; script-src 'self' 'unsafe-inline' https://www.googletagmanager.com https://pagead2.googlesyndication.com https://partner.googleadservices.com; style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; img-src 'self' data: https://oawgqxptwuoqkbksjcqv.supabase.co https://www.google-analytics.com https://www.googletagmanager.com https://googleads.g.doubleclick.net https://pagead2.googlesyndication.com; connect-src 'self' https://oawgqxptwuoqkbksjcqv.supabase.co wss://oawgqxptwuoqkbksjcqv.supabase.co https://www.google-analytics.com https://www.googletagmanager.com https://cdn.jsdelivr.net https://*.api.emailjs.com https://pagead2.googlesyndication.com; font-src 'self' https://cdn.jsdelivr.net; frame-src https://googleads.g.doubleclick.net https://tpc.googlesyndication.com; object-src 'none'; base-uri 'self';"
         }
       ]
     }
