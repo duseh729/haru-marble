@@ -15,6 +15,8 @@ const PrivacyPolicyPage = lazy(() => import('./pages/PrivacyPolicyPage'));
 const AboutUsPage = lazy(() => import('./pages/AboutUsPage'));
 const ContactUsPage = lazy(() => import('./pages/ContactUsPage'));
 const NotFoundPage = lazy(() => import('./pages/NotFoundPage'));
+const GuidePage = lazy(() => import('./pages/GuidePage'));
+const GuideDetailPage = lazy(() => import('./pages/GuideDetailPage'));
 
 // 페이지 로딩 중 표시할 스피너
 const PageLoader = () => (
@@ -104,6 +106,8 @@ function App() {
       <Suspense fallback={<PageLoader />}>
         <Routes>
           <Route path="/" element={<LandingPage />} />
+          <Route path="/guide" element={<GuidePage />} />
+          <Route path="/guide/:slug" element={<GuideDetailPage />} />
           <Route
             path="*"
             element={

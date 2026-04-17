@@ -58,6 +58,12 @@ export default function LandingPage() {
         </div>
         <div className="flex items-center gap-4">
           <button
+            onClick={() => navigate('/guide')}
+            className="text-gray-500 hover:text-gray-900 text-sm font-medium transition-colors"
+          >
+            이용 가이드
+          </button>
+          <button
             onClick={handleStartClick}
             className="bg-blue-500 hover:bg-blue-600 text-white text-sm font-medium px-4 py-2 rounded-lg transition-colors"
           >
@@ -203,6 +209,7 @@ export default function LandingPage() {
         </div>
 
         <div className="flex gap-4 md:gap-6 text-xs text-gray-500">
+          <button onClick={() => navigate('/guide')} className="hover:text-gray-900 transition-colors">이용 가이드</button>
           <button onClick={() => navigate('/about-us')} className="hover:text-gray-900 transition-colors">서비스 소개</button>
           <button onClick={() => navigate('/privacy')} className="hover:text-gray-900 transition-colors">개인정보처리방침</button>
           <button onClick={() => navigate('/contact-us')} className="hover:text-gray-900 transition-colors">문의하기</button>
