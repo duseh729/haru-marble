@@ -4,8 +4,8 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "vite",
-    "build": "tsc -b && vite build",
+    "dev": "granite dev",
+    "build": "ait build",
     "lint": "eslint .",
     "preview": "vite preview",
     "tunnel": "node scripts/tunnel.js",
@@ -13,9 +13,11 @@
     "test": "vitest",
     "test:e2e": "playwright test",
     "test:e2e:ui": "playwright test --ui",
-    "test:e2e:webkit": "playwright test --project=webkit-mobile --project=webkit"
+    "test:e2e:webkit": "playwright test --project=webkit-mobile --project=webkit",
+    "deploy": "ait deploy"
   },
   "dependencies": {
+    "@apps-in-toss/web-framework": "^2.4.7",
     "@emailjs/browser": "^4.4.1",
     "@radix-ui/react-slot": "^1.2.4",
     "@supabase/supabase-js": "^2.93.1",
